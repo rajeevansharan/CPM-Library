@@ -9,17 +9,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { 
+  ScriptureHeader, 
   FilterPill, 
   MaterialCard 
 } from '@/components/ScriptureSchoolComponents';
 
-export default function LibraryScreen() {
+export default function ScriptureSchoolScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#F8F9FB]" edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center justify-center px-6 py-4 bg-white">
-        <Text className="text-[#203A81] text-lg font-black tracking-tight uppercase">Library</Text>
-      </View>
+      <ScriptureHeader />
 
       <ScrollView 
         className="flex-1"
@@ -27,11 +26,11 @@ export default function LibraryScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
       >
         {/* Search Bar section */}
-        <View className="px-6 mb-6 mt-2">
+        <View className="px-6 mb-6">
           <View className="flex-row items-center bg-gray-100/80 rounded-2xl px-4 py-1 border border-gray-100">
             <MaterialCommunityIcons name="magnify" size={20} color="#9CA3AF" />
             <TextInput 
-              placeholder="Search library materials..." 
+              placeholder="Search Sunday School books..." 
               className="flex-1 ml-2 text-gray-700 h-11 text-sm font-medium"
               placeholderTextColor="#9CA3AF"
               style={{ outlineStyle: 'none' } as any}
@@ -99,4 +98,3 @@ export default function LibraryScreen() {
     </SafeAreaView>
   );
 }
-
