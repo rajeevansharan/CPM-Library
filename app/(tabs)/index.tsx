@@ -1,98 +1,106 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React from 'react';
+import { 
+  View, 
+  Text, 
+  ScrollView, 
+  TouchableOpacity 
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { 
+  SearchHeader, 
+  VerseOfTheDay, 
+  ActionCard, 
+  CategoryChip, 
+  BookCard, 
+  FeaturedCard 
+} from '@/components/HomeComponents';
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaView className="flex-1 bg-[#F8F9FB]" edges={['top']}>
+      <ScrollView 
+        className="flex-1" 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
+      >
+        {/* Top Header */}
+        <SearchHeader />
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        {/* Verse of the Day Section */}
+        <VerseOfTheDay />
+
+        {/* Categories Grid (2x2) */}
+        <View className="flex-row flex-wrap justify-between px-4 mb-6">
+          <ActionCard 
+            title="Scripture School" 
+            subtitle="Lessons & Curriculum" 
+            icon="school-outline" 
+            color="#203A81"
+            href="/scripture-school"
+          />
+          <ActionCard 
+            title="Voice Of Pentecost" 
+            subtitle="Archives & Periodicals" 
+            icon="bullhorn-variant-outline" 
+            color="#203A81"
+            href="/voice-of-pentecost"
+          />
+          <ActionCard 
+            title="Books of Pentecost" 
+            subtitle="Spiritual Literature" 
+            icon="book-open-variant" 
+            color="#203A81"
+            href="/books-of-pentecost"
+          />
+          <ActionCard 
+            title="Concordance Bible" 
+            subtitle="Study & References" 
+            icon="format-list-bulleted" 
+            color="#203A81"
+            href="/concordance"
+          />
+        </View>
+
+        {/* Category Filters */}
+        <View className="mb-8">
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            contentContainerStyle={{ paddingHorizontal: 16 }}
+          >
+            <CategoryChip label="All Items" active={true} />
+            <CategoryChip label="New Arrivals" />
+            <CategoryChip label="Theology" />
+            <CategoryChip label="History" />
+            <CategoryChip label="Prophecy" />
+          </ScrollView>
+        </View>
+
+        {/* Recent Uploads Section */}
+        <View className="px-4 mb-8">
+          <View className="flex-row justify-between items-end mb-5">
+            <Text className="text-[#203A81] text-xl font-bold">Recent Uploads</Text>
+            <TouchableOpacity>
+              <Text className="text-[#203A81] text-sm font-bold">See All</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <BookCard title="Steps to Salvation" author="Ministry Staff" />
+            <BookCard title="Early Church Truth" author="History Dept." />
+            <BookCard title="The Holy Ghost" author="CPM Elders" />
+            <BookCard title="Living Water" author="Archive Team" />
+          </ScrollView>
+        </View>
+
+        {/* Featured Publication Section */}
+        <View className="px-4 mb-6">
+          <Text className="text-[#203A81] text-lg font-bold mb-4">Monthly Featured Publication</Text>
+          <FeaturedCard />
+        </View>
+
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
