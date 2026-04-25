@@ -26,17 +26,6 @@ export default function BooksOfPentecostScreen() {
       >
         {/* Filters Section */}
         <View className="bg-white pb-6 pt-4 border-b border-gray-100 shadow-sm">
-           {/* Topic Filters */}
-           <View className="flex-row items-center px-6 mb-4">
-              <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mr-4">Topic</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                 <FilterChip label="All" active={true} />
-                 <FilterChip label="Doctrine" />
-                 <FilterChip label="Biography" />
-                 <FilterChip label="Hymns" />
-              </ScrollView>
-           </View>
-
            {/* Language & Filter Selection */}
            <View className="flex-row items-center px-6 justify-between">
               <View className="flex-row items-center flex-1">

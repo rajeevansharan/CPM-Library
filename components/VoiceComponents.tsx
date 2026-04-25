@@ -43,11 +43,6 @@ export const IssueCard = ({
           className="w-full aspect-[3/4] rounded-2xl bg-gray-200"
           resizeMode="cover"
         />
-        {isNew && (
-          <View className="absolute top-2 right-2 bg-yellow-400 px-2 py-1 rounded-md shadow-sm">
-            <Text className="text-[10px] font-black text-white">NEW</Text>
-          </View>
-        )}
       </View>
       <View className="mt-3">
         <Text className="text-[#203A81] font-bold text-sm">{title}</Text>

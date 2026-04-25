@@ -62,16 +62,19 @@ export const QuickAction = ({ title, icon, onPress, color = "#203A81" }: { title
 /**
  * Premium Upload Zone
  */
-export const UploadZone = ({ label, icon, sublabel, type = "document" }: { label: string, icon: string, sublabel: string, type?: 'image' | 'document' }) => (
-  <TouchableOpacity className="border-2 border-dashed border-gray-200 rounded-3xl p-8 items-center justify-center bg-gray-50/50 mb-6 active:bg-gray-50">
+export const UploadZone = ({ label, icon, sublabel, type = "document", onPress, fileName }: { label: string, icon: string, sublabel: string, type?: 'image' | 'document', onPress?: () => void, fileName?: string }) => (
+  <TouchableOpacity 
+    onPress={onPress}
+    className={`border-2 border-dashed ${fileName ? 'border-[#203A81] bg-blue-50/30' : 'border-gray-200 bg-gray-50/50'} rounded-3xl p-8 items-center justify-center mb-6 active:bg-gray-50`}
+  >
     <View className="bg-white p-4 rounded-full shadow-sm mb-3">
-      <MaterialCommunityIcons name={icon as any} size={32} color="#203A81" />
+      <MaterialCommunityIcons name={fileName ? (type === 'image' ? 'image-check' : 'file-check') : icon as any} size={32} color="#203A81" />
     </View>
-    <Text className="text-[#203A81] font-bold text-sm">{label}</Text>
-    <Text className="text-gray-400 text-[10px] mt-1 text-center">{sublabel}</Text>
+    <Text className="text-[#203A81] font-bold text-sm text-center" numberOfLines={1}>{fileName || label}</Text>
+    <Text className="text-gray-400 text-[10px] mt-1 text-center">{fileName ? 'Tap to change file' : sublabel}</Text>
     
     <View className="absolute bottom-4 right-4 bg-white p-1 rounded-full shadow-sm">
-        <MaterialCommunityIcons name="plus-circle" size={20} color="#C5A059" />
+        <MaterialCommunityIcons name={fileName ? "pencil" : "plus-circle"} size={20} color="#C5A059" />
     </View>
   </TouchableOpacity>
 );
@@ -92,7 +95,70 @@ export const AdminInput = ({ label, placeholder, icon, multiline = false, value,
         textAlignVertical={multiline ? 'top' : 'center'}
         value={value}
         onChangeText={onChangeText}
+        style={{ outlineStyle: 'none' } as any}
       />
     </View>
   </View>
 );
+
+import { Modal, Pressable } from 'react-native';
+
+/**
+ * Custom Selection Picker Modal
+ */
+export const SelectionPicker = ({ 
+  isVisible, 
+  onClose, 
+  options, 
+  onSelect, 
+  title 
+}: { 
+  isVisible: boolean, 
+  onClose: () => void, 
+  options: string[], 
+  onSelect: (val: string) => void,
+  title: string
+}) => (
+  <Modal 
+    visible={isVisible} 
+    transparent 
+    animationType="fade" 
+    onRequestClose={onClose}
+  >
+    <Pressable 
+      className="flex-1 bg-black/60 justify-center items-center px-10" 
+      onPress={onClose}
+    >
+      <View className="bg-white w-full rounded-[32px] overflow-hidden shadow-2xl">
+        <View className="bg-[#203A81] py-5 items-center">
+          <Text className="text-white font-black text-sm uppercase tracking-widest">{title}</Text>
+        </View>
+        <ScrollView className="max-h-80" showsVerticalScrollIndicator={false}>
+          {options.map((opt) => (
+            <TouchableOpacity 
+              key={opt} 
+              className="py-5 items-center border-b border-gray-50 active:bg-gray-50"
+              onPress={() => { onSelect(opt); onClose(); }}
+            >
+              <Text className="text-[#203A81] font-bold text-base">{opt}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        <TouchableOpacity 
+          className="py-5 items-center bg-gray-50" 
+          onPress={onClose}
+        >
+          <Text className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </Pressable>
+  </Modal>
+);
+
+export const GRADES = [
+  'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 
+  'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'
+];
+
+export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+export const YEARS = ["2024", "2023", "2022", "2021", "2020"];

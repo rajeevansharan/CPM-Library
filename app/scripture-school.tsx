@@ -214,6 +214,7 @@ export default function ScriptureSchoolScreen() {
             <MaterialCard 
               key={item.id}
               title={item.title} 
+              grade={item.grade}
               level={item.level} 
               year={item.year} 
               badge={item.badge} 

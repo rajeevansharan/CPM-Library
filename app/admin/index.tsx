@@ -47,17 +47,24 @@ export default function AdminDashboard() {
            />
            
            <QuickAction 
-             title="Manage Categories" 
-             icon="format-list-bulleted-type" 
-             onPress={() => {}}
+             title="Manage Scripture Books" 
+             icon="book-multiple" 
+             onPress={() => router.push('/admin/manage-books')}
              color="#C5A059"
+           />
+           
+           <QuickAction 
+             title="Manage Voice Issues" 
+             icon="library-shelves" 
+             onPress={() => router.push('/admin/manage-voice')}
+             color="#3B82F6"
            />
            
            <QuickAction 
              title="User Analytics" 
              icon="chart-timeline-variant" 
              onPress={() => {}}
-             color="#3B82F6"
+             color="#10B981"
            />
         </View>
 

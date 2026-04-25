@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AdminHeader, AdminInput, UploadZone } from '@/components/AdminComponents';
+import { AdminHeader, AdminInput, UploadZone, SelectionPicker, GRADES, MONTHS, YEARS } from '@/components/AdminComponents';
 import { useBooks } from '@/context/BooksContext';
 
 export default function UploadBookScreen() {
@@ -15,42 +15,72 @@ export default function UploadBookScreen() {
     title: '',
     subtitle: '',
     description: '',
-    grade: '',
+    grade: 'Grade 1',
     level: 'Beginner',
-    year: '2024 Edition',
+    year: '2024',
     month: 'January'
   });
 
-  const handleUpload = () => {
+  const [isGradePickerVisible, setIsGradePickerVisible] = useState(false);
+  const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
+  const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
+
+  const [coverImage, setCoverImage] = useState<any>(null);
+  const [pdfFile, setPdfFile] = useState<any>(null);
+
+  // Use refs for hidden file inputs (Web compatible)
+  const imageInputRef = React.useRef<any>(null);
+  const docInputRef = React.useRef<any>(null);
+
+  const handlePickImage = () => {
+    if (imageInputRef.current) imageInputRef.current.click();
+  };
+
+  const handlePickDocument = () => {
+    if (docInputRef.current) docInputRef.current.click();
+  };
+
+  const onFileChange = (e: any, setFile: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFile({ name: file.name, uri: URL.createObjectURL(file), fileObject: file });
+      Alert.alert("File Selected", `${file.name} ready for upload`);
+    }
+  };
+
+  const handleUpload = async () => {
     if (!formData.title) {
       Alert.alert("Error", "Please enter a title");
       return;
     }
 
-    if (type === 'scripture') {
-      addScriptureBook({
-        title: formData.title,
-        level: formData.level,
-        year: formData.year,
-        category: 'Grade',
-        badge: 'NEW'
-      });
-    } else {
-      addVoiceBook({
-        title: formData.title,
-        month: formData.month,
-        year: formData.year.split(' ')[0], // Extract year
-        subtitle: formData.subtitle || "The Power of Faith",
-        category: "Topic",
-        isNew: true
-      });
-    }
+    try {
+      if (type === 'scripture') {
+        await addScriptureBook({
+          title: formData.title,
+          grade: formData.grade,
+          description: formData.description,
+          category: 'Grade'
+        }, pdfFile?.fileObject, coverImage?.fileObject);
+      } else {
+        await addVoiceBook({
+          title: formData.title,
+          month: formData.month,
+          year: formData.year,
+          subtitle: formData.subtitle,
+          description: formData.description,
+          category: "Topic"
+        }, pdfFile?.fileObject, coverImage?.fileObject);
+      }
 
-    Alert.alert(
-      "Success", 
-      `${type === 'scripture' ? 'Book' : 'Issue'} uploaded successfully!`,
-      [{ text: "OK", onPress: () => router.back() }]
-    );
+      Alert.alert(
+        "Success", 
+        `${type === 'scripture' ? 'Book' : 'Issue'} uploaded successfully!`,
+        [{ text: "OK", onPress: () => router.back() }]
+      );
+    } catch (error) {
+      Alert.alert("Error", "Failed to upload publication");
+    }
   };
 
   return (
@@ -116,22 +146,31 @@ export default function UploadBookScreen() {
            <View className="flex-row mb-6">
               <View className="flex-1 mr-2">
                  <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">
-                   {type === 'scripture' ? 'Level' : 'Month'}
+                   {type === 'scripture' ? 'Grade' : 'Month'}
                  </Text>
-                 <View className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex-row justify-between items-center">
+                 <TouchableOpacity 
+                    onPress={() => type === 'scripture' ? setIsGradePickerVisible(true) : setIsMonthPickerVisible(true)}
+                    className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex-row justify-between items-center"
+                 >
                     <Text className="text-[#203A81] text-sm font-bold">
-                      {type === 'scripture' ? formData.level : formData.month}
+                      {type === 'scripture' ? formData.grade : formData.month}
                     </Text>
                     <MaterialCommunityIcons name="chevron-down" size={18} color="#203A81" />
-                 </View>
+                 </TouchableOpacity>
               </View>
-              <View className="flex-1 ml-2">
-                 <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">Year / Edition</Text>
-                 <View className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex-row justify-between items-center">
-                    <Text className="text-[#203A81] text-sm font-bold">{formData.year}</Text>
-                    <MaterialCommunityIcons name="chevron-down" size={18} color="#203A81" />
-                 </View>
-              </View>
+              
+              {type === 'voice' && (
+                <View className="flex-1 ml-2">
+                   <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">Year</Text>
+                   <TouchableOpacity 
+                      onPress={() => setIsYearPickerVisible(true)}
+                      className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex-row justify-between items-center"
+                   >
+                      <Text className="text-[#203A81] text-sm font-bold">{formData.year}</Text>
+                      <MaterialCommunityIcons name="chevron-down" size={18} color="#203A81" />
+                   </TouchableOpacity>
+                </View>
+              )}
            </View>
 
            {/* File Uploads */}
@@ -141,7 +180,9 @@ export default function UploadBookScreen() {
                     label="Cover Image" 
                     icon="image-outline" 
                     sublabel="JPG, PNG (Max 5MB)" 
-                    type="image" 
+                    type="image"
+                    onPress={handlePickImage}
+                    fileName={coverImage?.name}
                  />
               </View>
               <View className="flex-1 ml-2">
@@ -149,6 +190,8 @@ export default function UploadBookScreen() {
                     label="Publication File" 
                     icon="file-pdf-box" 
                     sublabel="PDF, EPUB (Max 50MB)" 
+                    onPress={handlePickDocument}
+                    fileName={pdfFile?.name}
                  />
               </View>
            </View>
@@ -172,6 +215,45 @@ export default function UploadBookScreen() {
            </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Hidden File Inputs for Web compatibility */}
+      <View style={{ display: 'none' }}>
+        <input 
+          type="file" 
+          ref={imageInputRef} 
+          accept="image/*" 
+          onChange={(e) => onFileChange(e, setCoverImage)} 
+        />
+        <input 
+          type="file" 
+          ref={docInputRef} 
+          accept=".pdf,.epub" 
+          onChange={(e) => onFileChange(e, setPdfFile)} 
+        />
+      </View>
+
+      {/* Selectors Pickers */}
+      <SelectionPicker 
+        isVisible={isGradePickerVisible}
+        onClose={() => setIsGradePickerVisible(false)}
+        options={GRADES}
+        onSelect={(val) => setFormData({ ...formData, grade: val })}
+        title="Select Grade"
+      />
+      <SelectionPicker 
+        isVisible={isMonthPickerVisible}
+        onClose={() => setIsMonthPickerVisible(false)}
+        options={MONTHS}
+        onSelect={(val) => setFormData({ ...formData, month: val })}
+        title="Select Month"
+      />
+      <SelectionPicker 
+        isVisible={isYearPickerVisible}
+        onClose={() => setIsYearPickerVisible(false)}
+        options={YEARS}
+        onSelect={(val) => setFormData({ ...formData, year: val })}
+        title="Select Year"
+      />
     </SafeAreaView>
   );
 }

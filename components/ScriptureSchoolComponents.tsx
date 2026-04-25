@@ -55,6 +55,7 @@ export const FilterPill = ({
  */
 export const MaterialCard = ({ 
   title, 
+  grade,
   level, 
   year, 
   badge, 
@@ -62,6 +63,7 @@ export const MaterialCard = ({
   onDownloadPress
 }: { 
   title: string, 
+  grade?: string,
   level: string, 
   year: string, 
   badge?: string,
@@ -82,23 +84,10 @@ export const MaterialCard = ({
       {/* Info */}
       <View className="flex-1 ml-4 justify-between py-1">
         <View>
-          <View className="flex-row items-center justify-between mb-1">
-            <Text className="text-[#203A81] font-bold text-base flex-1 mr-2" numberOfLines={1}>{title}</Text>
-            {badge && (
-              <View 
-                className="px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: badge === 'NEW' ? '#EFF6FF' : '#FFF8E6' }}
-              >
-                <Text 
-                  className="text-[8px] font-black uppercase"
-                  style={{ color: badge === 'NEW' ? '#3B82F6' : '#C5A059' }}
-                >
-                  {badge}
-                </Text>
-              </View>
-            )}
+          {grade && <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">{grade}</Text>}
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-[#203A81] font-bold text-base flex-1 mr-2" numberOfLines={2}>{title}</Text>
           </View>
-          <Text className="text-gray-400 text-xs font-medium mb-4">{level} • {year}</Text>
         </View>
 
         <TouchableOpacity className="flex-row items-center" onPress={onDownloadPress}>

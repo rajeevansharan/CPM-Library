@@ -1,13 +1,15 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export interface ScriptureMaterial {
   id: string;
   title: string;
-  level: string;
-  year: string;
-  badge?: string;
-  imageUri?: string;
+  grade: string;
+  description?: string;
+  fileUrl?: string;
   category: string;
+  type: 'scripture';
 }
 
 export interface VoiceIssue {
@@ -16,96 +18,107 @@ export interface VoiceIssue {
   month: string;
   year: string;
   subtitle: string;
+  description?: string;
+  fileUrl?: string;
   category: string;
-  imageUri?: string;
+  type: 'voice';
   isNew?: boolean;
 }
 
 interface BooksContextType {
   scriptureBooks: ScriptureMaterial[];
   voiceBooks: VoiceIssue[];
-  addScriptureBook: (book: Omit<ScriptureMaterial, 'id'>) => void;
-  addVoiceBook: (issue: Omit<VoiceIssue, 'id'>) => void;
+  addScriptureBook: (book: Partial<ScriptureMaterial>, file?: any) => Promise<void>;
+  addVoiceBook: (issue: Partial<VoiceIssue>, file?: any) => Promise<void>;
+  deleteBook: (type: 'scripture' | 'voice', id: string) => Promise<void>;
+  refreshBooks: () => Promise<void>;
 }
 
 const BooksContext = createContext<BooksContextType | undefined>(undefined);
 
-// Initial Data from current components
-const INITIAL_SCRIPTURE: ScriptureMaterial[] = [
-  {
-    id: '1',
-    title: "Grade 8: Understanding Faith", 
-    level: "Intermediate", 
-    year: "2024 Curriculum", 
-    badge: "MOST DOWNLOADED",
-    category: "Grade"
-  },
-  {
-    id: '2',
-    title: "Grade 12: Foundations of Truth", 
-    level: "Advanced", 
-    year: "2024 Curriculum", 
-    badge: "NEW", 
-    imageUri: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=300&auto=format&fit=crop",
-    category: "Grade"
-  },
-  {
-    id: '3',
-    title: "Grade 2: The Loving Shepherd", 
-    level: "Beginner", 
-    year: "2023 Edition", 
-    badge: "MOST DOWNLOADED",
-    imageUri: "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=300&auto=format&fit=crop",
-    category: "Grade"
-  },
-  {
-    id: '4',
-    title: "Church History & Doctrine", 
-    level: "Intermediate", 
-    year: "2024 Curriculum", 
-    imageUri: "https://images.unsplash.com/photo-1532012197367-e43d0f467e9f?q=80&w=300&auto=format&fit=crop",
-    category: "Category"
-  }
-];
-
-const INITIAL_VOICE: VoiceIssue[] = [
-  { 
-    id: '1', 
-    title: "October 2023", 
-    month: "October",
-    year: "2023",
-    subtitle: "The Power of Stillness", 
-    category: "Topic",
-    imageUri: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop",
-    isNew: true
-  },
-  { 
-    id: '2', 
-    title: "September 2023", 
-    month: "September",
-    year: "2023",
-    subtitle: "Walk by Faith", 
-    category: "Topic",
-    imageUri: "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400&auto=format&fit=crop"
-  }
-];
-
 export const BooksProvider = ({ children }: { children: ReactNode }) => {
-  const [scriptureBooks, setScriptureBooks] = useState<ScriptureMaterial[]>(INITIAL_SCRIPTURE);
-  const [voiceBooks, setVoiceBooks] = useState<VoiceIssue[]>(INITIAL_VOICE);
+  const [scriptureBooks, setScriptureBooks] = useState<ScriptureMaterial[]>([]);
+  const [voiceBooks, setVoiceBooks] = useState<VoiceIssue[]>([]);
 
-  const addScriptureBook = (book: Omit<ScriptureMaterial, 'id'>) => {
-    const newBook = { ...book, id: Math.random().toString(36).substr(2, 9) };
-    setScriptureBooks(prev => [newBook, ...prev]);
+  const refreshBooks = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/books`);
+      const data = await response.json();
+      setScriptureBooks(data.scriptureBooks);
+      setVoiceBooks(data.voiceBooks);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
   };
 
-  const addVoiceBook = (issue: Omit<VoiceIssue, 'id'>) => {
-    const newIssue = { ...issue, id: Math.random().toString(36).substr(2, 9) };
-    setVoiceBooks(prev => [newIssue, ...prev]);
+  useEffect(() => {
+    refreshBooks();
+  }, []);
+
+  const addScriptureBook = async (book: Partial<ScriptureMaterial>, file?: any, coverImage?: any) => {
+    try {
+      const formData = new FormData();
+      Object.keys(book).forEach(key => {
+        if ((book as any)[key] !== undefined) {
+          formData.append(key, (book as any)[key]);
+        }
+      });
+      if (file) formData.append('file', file);
+      if (coverImage) formData.append('coverImage', coverImage);
+
+      const response = await fetch(`${API_BASE_URL}/books/scripture`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        await refreshBooks();
+      }
+    } catch (error) {
+      console.error("Error adding scripture book:", error);
+    }
+  };
+
+  const addVoiceBook = async (issue: Partial<VoiceIssue>, file?: any, coverImage?: any) => {
+    try {
+      const formData = new FormData();
+      Object.keys(issue).forEach(key => {
+        if ((issue as any)[key] !== undefined) {
+          formData.append(key, (issue as any)[key]);
+        }
+      });
+      if (file) formData.append('file', file);
+      if (coverImage) formData.append('coverImage', coverImage);
+
+      const response = await fetch(`${API_BASE_URL}/books/voice`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        await refreshBooks();
+      }
+    } catch (error) {
+      console.error("Error adding voice issue:", error);
+    }
+  };
+
+  const deleteBook = async (type: 'scripture' | 'voice', id: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/books/${type}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await refreshBooks();
+      }
+    } catch (error) {
+      console.error("Error deleting book:", error);
+    }
   };
 
   return (
-    <BooksContext.Provider value={{ scriptureBooks, voiceBooks, addScriptureBook, addVoiceBook }}>
+    <BooksContext.Provider value={{ scriptureBooks, voiceBooks, addScriptureBook, addVoiceBook, deleteBook, refreshBooks }}>
       {children}
     </BooksContext.Provider>
   );
