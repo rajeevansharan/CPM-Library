@@ -129,7 +129,10 @@ const SelectionPicker = ({
   </Modal>
 );
 
+import { useBooks } from '@/context/BooksContext';
+
 export default function VoiceOfPentecostScreen() {
+  const { voiceBooks } = useBooks();
   const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedMonth, setSelectedMonth] = useState('October');
@@ -137,7 +140,7 @@ export default function VoiceOfPentecostScreen() {
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
 
-  const filteredIssues = ISSUES_DATA.filter(issue => {
+  const filteredIssues = voiceBooks.filter(issue => {
     const matchesSearch = issue.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           issue.subtitle.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesMonth = selectedMonth ? issue.month === selectedMonth : true;

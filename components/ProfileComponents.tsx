@@ -48,17 +48,23 @@ export const MenuItem = ({
   subtitle, 
   showSwitch = false, 
   switchValue = false, 
-  onSwitchChange 
+  onSwitchChange,
+  onPress
 }: { 
   icon: string, 
   title: string, 
   subtitle?: string, 
   showSwitch?: boolean, 
   switchValue?: boolean, 
-  onSwitchChange?: (val: boolean) => void 
+  onSwitchChange?: (val: boolean) => void,
+  onPress?: () => void
 }) => {
   return (
-    <TouchableOpacity className="flex-row items-center justify-between py-4 border-b border-gray-50">
+    <TouchableOpacity 
+      onPress={onPress}
+      disabled={showSwitch}
+      className="flex-row items-center justify-between py-4 border-b border-gray-50"
+    >
       <View className="flex-row items-center flex-1">
         <View className="bg-[#F0F4FF] p-2.5 rounded-xl mr-4">
           <MaterialCommunityIcons name={icon as any} size={22} color="#203A81" />

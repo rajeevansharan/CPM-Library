@@ -126,13 +126,16 @@ const SelectionPicker = ({
   </Modal>
 );
 
+import { useBooks } from '@/context/BooksContext';
+
 export default function ScriptureSchoolScreen() {
+  const { scriptureBooks } = useBooks();
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
   const [isGradePickerVisible, setIsGradePickerVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('All');
 
-  const filteredMaterials = MATERIALS.filter(item => {
+  const filteredMaterials = scriptureBooks.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.level.toLowerCase().includes(searchQuery.toLowerCase());
     

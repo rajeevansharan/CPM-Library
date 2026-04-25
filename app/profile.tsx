@@ -49,7 +49,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* App Preferences Section */}
+         {/* App Preferences Section */}
         <View className="px-6 mb-8">
           <Text className="text-gray-400 text-[10px] font-black uppercase tracking-[1.5px] mb-4">App Preferences</Text>
           <View className="bg-white rounded-[32px] px-5 py-2 shadow-lg shadow-blue-900/5 border border-gray-50">
@@ -65,6 +65,19 @@ export default function ProfileScreen() {
                 showSwitch={true} 
                 switchValue={darkMode}
                 onSwitchChange={setDarkMode}
+             />
+          </View>
+        </View>
+
+        {/* Administrative Section */}
+        <View className="px-6 mb-8">
+          <Text className="text-gray-400 text-[10px] font-black uppercase tracking-[1.5px] mb-4">Administrative</Text>
+          <View className="bg-white rounded-[32px] px-5 py-2 shadow-lg shadow-blue-900/5 border border-gray-50">
+             <MenuItem 
+                icon="shield-account-outline" 
+                title="Admin Portal" 
+                subtitle="Manage library content"
+                onPress={() => router.push('/admin')}
              />
           </View>
         </View>
