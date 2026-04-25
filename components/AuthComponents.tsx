@@ -94,15 +94,23 @@ export const TabToggle = ({ activeTab, onTabChange }: { activeTab: 'login' | 're
     <View className="flex-row bg-gray-100 p-1 rounded-lg mb-6 shadow-inner">
       <TouchableOpacity 
         onPress={() => onTabChange('login')}
-        className={`flex-1 py-2.5 rounded-md items-center ${activeTab === 'login' ? 'bg-white shadow-sm' : ''}`}
+        className="flex-1 py-2.5 rounded-md items-center"
+        style={activeTab === 'login' ? { backgroundColor: '#FFFFFF' } : {}}
       >
-        <Text className={`font-bold text-sm ${activeTab === 'login' ? 'text-[#203A81]' : 'text-gray-500'}`}>Login</Text>
+        <Text 
+          className="font-bold text-sm"
+          style={{ color: activeTab === 'login' ? '#203A81' : '#6B7280' }}
+        >Login</Text>
       </TouchableOpacity>
       <TouchableOpacity 
         onPress={() => onTabChange('register')}
-        className={`flex-1 py-2.5 rounded-md items-center ${activeTab === 'register' ? 'bg-white shadow-sm' : ''}`}
+        className="flex-1 py-2.5 rounded-md items-center"
+        style={activeTab === 'register' ? { backgroundColor: '#FFFFFF' } : {}}
       >
-        <Text className={`font-bold text-sm ${activeTab === 'register' ? 'text-[#203A81]' : 'text-gray-500'}`}>Register</Text>
+        <Text 
+          className="font-bold text-sm"
+          style={{ color: activeTab === 'register' ? '#203A81' : '#6B7280' }}
+        >Register</Text>
       </TouchableOpacity>
     </View>
   );

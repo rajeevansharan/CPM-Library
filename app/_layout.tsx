@@ -18,11 +18,8 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Hide the native splash screen immediately so our custom one shows
+        // Hide the native splash screen immediately
         await SplashScreen.hideAsync();
-        
-        // Keep our custom splash screen visible for 2.5 seconds
-        await new Promise((resolve) => setTimeout(resolve, 2500));
       } catch (e) {
         console.warn(e);
       } finally {
@@ -34,15 +31,7 @@ export default function RootLayout() {
   }, []);
 
   if (!isReady) {
-    // Show the custom splash screen while loading
-    return (
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="splash" options={{ headerShown: false }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    );
+    return null;
   }
 
   return (
@@ -53,6 +42,13 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="scripture-school" options={{ headerShown: false }} />
+        <Stack.Screen name="concordance" options={{ headerShown: false }} />
+        <Stack.Screen name="books-of-pentecost" options={{ headerShown: false }} />
+        <Stack.Screen name="voice-of-pentecost" options={{ headerShown: false }} />
+        <Stack.Screen name="publication-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="profile" options={{ headerShown: false }} />
+        <Stack.Screen name="splash" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />

@@ -34,22 +34,55 @@ export const SearchHeader = () => {
   );
 };
 
-/**
- * Verse of the Day Card
- */
 export const VerseOfTheDay = () => {
+  const [verse, setVerse] = React.useState({
+    text: "Your word is a lamp to my feet and a light to my path.",
+    reference: "Psalm 119:105"
+  });
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchVerse = async () => {
+      try {
+        // Fetching random verse from Bible API
+        const response = await fetch('https://beta.ourmanna.com/api/v1/get?format=json&order=random');
+        const data = await response.json();
+        
+        if (data?.verse?.details) {
+          setVerse({
+            text: data.verse.details.text,
+            reference: data.verse.details.reference
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching Bible verse:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVerse();
+  }, []);
+
   return (
     <View className="mx-4 bg-[#FFF8E6] rounded-3xl p-5 border border-[#F5E6BD] relative overflow-hidden mb-6 shadow-sm">
       <View className="absolute -right-4 -top-4 opacity-5">
         <MaterialCommunityIcons name="book-open-page-variant" size={150} color="#C5A059" />
       </View>
-      <Text className="text-[#C5A059] text-[10px] font-black tracking-[2px] uppercase mb-2">Verse of the Day</Text>
+      <View className="flex-row justify-between items-center mb-2">
+        <Text className="text-[#C5A059] text-[10px] font-black tracking-[2px] uppercase">Verse of the Day</Text>
+        {loading && (
+          <View className="bg-[#C5A059] px-2 py-0.5 rounded-full">
+            <Text className="text-white text-[8px] font-bold">LOADING</Text>
+          </View>
+        )}
+      </View>
       <Text className="text-[#203A81] text-lg font-bold italic leading-7 mb-2">
-        "Your word is a lamp to my feet and a light to my path."
+        &quot;{verse.text.trim()}&quot;
       </Text>
       <View className="flex-row items-center">
         <View className="h-[2px] w-4 bg-[#C5A059] mr-2 rounded-full" />
-        <Text className="text-[#C5A059] font-bold text-xs">Psalm 119:105</Text>
+        <Text className="text-[#C5A059] font-bold text-xs">{verse.reference}</Text>
       </View>
     </View>
   );
@@ -62,7 +95,7 @@ export const ActionCard = ({ title, subtitle, icon, color, href }: { title: stri
   const content = (
     <View className="bg-white rounded-[32px] p-6 w-full h-[180px] shadow-lg shadow-blue-900/5 border border-gray-100 items-center justify-between">
       <View className="flex-1 items-center justify-center">
-        <View className={`w-14 h-14 rounded-2xl items-center justify-center mb-4 bg-[#F0F4FF]`}>
+        <View className="w-14 h-14 rounded-2xl items-center justify-center mb-4 bg-[#F0F4FF]">
           <MaterialCommunityIcons name={icon as any} size={28} color="#203A81" />
         </View>
         <Text className="text-[#203A81] font-black text-center text-sm mb-1 leading-tight">{title}</Text>
@@ -94,9 +127,17 @@ export const ActionCard = ({ title, subtitle, icon, color, href }: { title: stri
 export const CategoryChip = ({ label, active = false }: { label: string, active?: boolean }) => {
   return (
     <TouchableOpacity 
-      className={`px-6 py-2.5 rounded-full mr-2 ${active ? 'bg-[#203A81] shadow-md shadow-blue-900/40' : 'bg-white border border-gray-100'}`}
+      className="px-6 py-2.5 rounded-full mr-2"
+      style={{
+        backgroundColor: active ? '#203A81' : '#FFFFFF',
+        borderWidth: active ? 0 : 1,
+        borderColor: '#F3F4F6',
+      }}
     >
-      <Text className={`font-bold text-xs ${active ? 'text-white' : 'text-gray-500'}`}>{label}</Text>
+      <Text 
+        className="font-bold text-xs"
+        style={{ color: active ? '#FFFFFF' : '#6B7280' }}
+      >{label}</Text>
     </TouchableOpacity>
   );
 };
@@ -137,7 +178,7 @@ export const FeaturedCard = () => {
         <Text className="text-[#C5A059] text-[9px] font-black uppercase tracking-[1.5px] mb-1">May 2024 Edition</Text>
         <Text className="text-[#203A81] text-lg font-bold leading-6 mb-2">The Power of Persistent Praise</Text>
         <Text className="text-gray-400 text-[10px] leading-4 mb-4" numberOfLines={2}>
-          Explore the spiritual impact of devotion and the theological roots of CPM's praise...
+          Explore the spiritual impact of devotion and the theological roots of CPM&apos;s praise...
         </Text>
         <TouchableOpacity className="bg-[#203A81] px-6 py-3 rounded-2xl self-start shadow-md shadow-blue-900/30 active:opacity-90">
           <Text className="text-white font-bold text-xs">Read Now</Text>

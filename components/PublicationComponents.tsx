@@ -51,11 +51,22 @@ export const ActionButton = ({
 }) => {
   return (
     <TouchableOpacity 
-      className={`flex-row items-center justify-center py-4 rounded-2xl ${primary ? 'bg-[#203A81]' : 'bg-white border border-gray-100 flex-1'}`}
-      style={primary ? {} : { elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 }}
+      className="flex-row items-center justify-center py-4 rounded-2xl"
+      style={[
+        {
+          backgroundColor: primary ? '#203A81' : '#FFFFFF',
+          borderWidth: primary ? 0 : 1,
+          borderColor: '#F3F4F6',
+          flex: primary ? undefined : 1,
+        },
+        primary ? {} : { elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 }
+      ]}
     >
       <MaterialCommunityIcons name={icon as any} size={20} color={primary ? 'white' : '#203A81'} />
-      <Text className={`font-black text-sm ml-2 ${primary ? 'text-white' : 'text-[#203A81]'}`}>{label}</Text>
+      <Text 
+        className="font-black text-sm ml-2"
+        style={{ color: primary ? '#FFFFFF' : '#203A81' }}
+      >{label}</Text>
     </TouchableOpacity>
   );
 };

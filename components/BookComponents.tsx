@@ -50,9 +50,17 @@ export const FilterChip = ({
 
   return (
     <TouchableOpacity 
-      className={`px-6 py-2 rounded-full mr-2 ${active ? 'bg-[#203A81]' : 'bg-gray-100 border border-gray-100'}`}
+      className="px-6 py-2 rounded-full mr-2"
+      style={{
+        backgroundColor: active ? '#203A81' : '#F3F4F6',
+        borderWidth: active ? 0 : 1,
+        borderColor: '#F3F4F6',
+      }}
     >
-      <Text className={`font-bold text-xs ${active ? 'text-white' : 'text-gray-500'}`}>{label}</Text>
+      <Text 
+        className="font-bold text-xs"
+        style={{ color: active ? '#FFFFFF' : '#6B7280' }}
+      >{label}</Text>
     </TouchableOpacity>
   );
 };

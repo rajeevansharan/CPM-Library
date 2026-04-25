@@ -24,12 +24,29 @@ export const ConcordanceHeader = () => {
 /**
  * Version Chip (KJV, NIV, etc)
  */
-export const VersionChip = ({ label, active = false }: { label: string, active?: boolean }) => {
+export const VersionChip = ({ 
+  label, 
+  active = false,
+  onPress 
+}: { 
+  label: string, 
+  active?: boolean,
+  onPress?: () => void
+}) => {
   return (
     <TouchableOpacity 
-      className={`px-8 py-2 rounded-xl mr-2 ${active ? 'bg-white shadow-sm border border-gray-100' : 'bg-transparent'}`}
+      onPress={onPress}
+      className="px-8 py-2 rounded-xl mr-2"
+      style={{
+        backgroundColor: active ? '#FFFFFF' : 'transparent',
+        borderWidth: active ? 1 : 0,
+        borderColor: active ? '#F3F4F6' : 'transparent',
+      }}
     >
-      <Text className={`font-bold text-xs ${active ? 'text-[#203A81]' : 'text-gray-400'}`}>{label}</Text>
+      <Text 
+        className="font-bold text-xs"
+        style={{ color: active ? '#203A81' : '#9CA3AF' }}
+      >{label}</Text>
     </TouchableOpacity>
   );
 };

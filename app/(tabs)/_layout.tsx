@@ -10,16 +10,20 @@ export default function TabLayout() {
         tabBarInactiveTintColor: '#9CA3AF',
         headerShown: false,
         tabBarStyle: {
-          borderTopWidth: 1,
-          borderTopColor: '#F3F4F6',
-          height: 65,
-          paddingBottom: 10,
+          borderTopWidth: 0,
+          backgroundColor: '#000000',
+          height: 80,
+          paddingBottom: 20,
           paddingTop: 10,
+          position: 'absolute',
+          elevation: 0,
         },
         tabBarLabelStyle: {
           fontSize: 10,
-          fontWeight: 'bold',
-        }
+          fontWeight: '900',
+          marginBottom: -5,
+        },
+        tabBarShowLabel: true,
       }}>
       <Tabs.Screen
         name="index"

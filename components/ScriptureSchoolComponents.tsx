@@ -24,12 +24,28 @@ export const ScriptureHeader = () => {
 /**
  * Filter Pill for Categories
  */
-export const FilterPill = ({ label, active = false }: { label: string, active?: boolean }) => {
+export const FilterPill = ({ 
+  label, 
+  active = false,
+  onPress 
+}: { 
+  label: string, 
+  active?: boolean,
+  onPress?: () => void
+}) => {
   return (
     <TouchableOpacity 
-      className={`px-8 py-3 rounded-2xl mr-3 border ${active ? 'bg-[#203A81] border-[#203A81]' : 'bg-white border-gray-100 shadow-sm'}`}
+      onPress={onPress}
+      className="px-8 py-3 rounded-2xl mr-3 border"
+      style={{
+        backgroundColor: active ? '#203A81' : '#FFFFFF',
+        borderColor: active ? '#203A81' : '#F3F4F6',
+      }}
     >
-      <Text className={`font-bold text-sm ${active ? 'text-white' : 'text-gray-500'}`}>{label}</Text>
+      <Text 
+        className="font-bold text-sm"
+        style={{ color: active ? '#FFFFFF' : '#6B7280' }}
+      >{label}</Text>
     </TouchableOpacity>
   );
 };
@@ -42,13 +58,15 @@ export const MaterialCard = ({
   level, 
   year, 
   badge, 
-  imageUri 
+  imageUri,
+  onDownloadPress
 }: { 
   title: string, 
   level: string, 
   year: string, 
   badge?: string,
-  imageUri?: string 
+  imageUri?: string,
+  onDownloadPress?: () => void
 }) => {
   return (
     <TouchableOpacity className="bg-white rounded-3xl p-4 mb-4 flex-row items-center shadow-lg shadow-blue-900/5 border border-gray-50 mx-4">
@@ -67,8 +85,14 @@ export const MaterialCard = ({
           <View className="flex-row items-center justify-between mb-1">
             <Text className="text-[#203A81] font-bold text-base flex-1 mr-2" numberOfLines={1}>{title}</Text>
             {badge && (
-              <View className={`px-2 py-0.5 rounded-full ${badge === 'NEW' ? 'bg-blue-50' : 'bg-[#FFF8E6]'}`}>
-                <Text className={`text-[8px] font-black uppercase ${badge === 'NEW' ? 'text-blue-500' : 'text-[#C5A059]'}`}>
+              <View 
+                className="px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: badge === 'NEW' ? '#EFF6FF' : '#FFF8E6' }}
+              >
+                <Text 
+                  className="text-[8px] font-black uppercase"
+                  style={{ color: badge === 'NEW' ? '#3B82F6' : '#C5A059' }}
+                >
                   {badge}
                 </Text>
               </View>
@@ -77,7 +101,7 @@ export const MaterialCard = ({
           <Text className="text-gray-400 text-xs font-medium mb-4">{level} • {year}</Text>
         </View>
 
-        <TouchableOpacity className="flex-row items-center">
+        <TouchableOpacity className="flex-row items-center" onPress={onDownloadPress}>
           <MaterialCommunityIcons name="download" size={14} color="#203A81" />
           <Text className="text-[#203A81] font-black text-[10px] ml-1 uppercase tracking-widest">Download PDF</Text>
         </TouchableOpacity>
