@@ -131,20 +131,19 @@ const SelectionPicker = ({
 
 export default function VoiceOfPentecostScreen() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('Topic');
+
   const [selectedMonth, setSelectedMonth] = useState('October');
   const [selectedYear, setSelectedYear] = useState('2023');
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
 
   const filteredIssues = ISSUES_DATA.filter(issue => {
-    const matchesCategory = issue.category === activeCategory;
     const matchesSearch = issue.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           issue.subtitle.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesMonth = selectedMonth ? issue.month === selectedMonth : true;
     const matchesYear = selectedYear ? issue.year === selectedYear : true;
     
-    return matchesCategory && matchesSearch && matchesMonth && matchesYear;
+    return matchesSearch && matchesMonth && matchesYear;
   });
 
   return (
@@ -177,24 +176,7 @@ export default function VoiceOfPentecostScreen() {
            </View>
         </View>
 
-        {/* Category Tabs */}
-        <View className="px-6 mb-6">
-           <View className="flex-row bg-white p-1 rounded-xl shadow-sm border border-gray-100">
-              {['Topic', 'Author', 'Scripture'].map(cat => (
-                <TouchableOpacity 
-                  key={cat}
-                  onPress={() => setActiveCategory(cat)}
-                  className="flex-1 py-2 rounded-lg items-center"
-                  style={activeCategory === cat ? { backgroundColor: '#203A81' } : {}}
-                >
-                   <Text 
-                     className="font-bold text-xs tracking-tight"
-                     style={{ color: activeCategory === cat ? '#FFFFFF' : '#9CA3AF' }}
-                   >{cat}</Text>
-                </TouchableOpacity>
-              ))}
-           </View>
-        </View>
+
 
         {/* Dropdown Selectors */}
         <View className="flex-row items-center px-6 mb-6 justify-between">

@@ -61,28 +61,13 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Category Filters */}
-        <View className="mb-8">
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
-            contentContainerStyle={{ paddingHorizontal: 16 }}
-          >
-            <CategoryChip label="All Items" active={true} />
-            <CategoryChip label="New Arrivals" />
-            <CategoryChip label="Theology" />
-            <CategoryChip label="History" />
-            <CategoryChip label="Prophecy" />
-          </ScrollView>
-        </View>
-
         {/* Recent Uploads Section */}
         <View className="px-4 mb-8">
           <View className="flex-row justify-between items-end mb-5">
             <Text className="text-[#203A81] text-xl font-bold">Recent Uploads</Text>
-            <TouchableOpacity>
+          {/*  <TouchableOpacity>
               <Text className="text-[#203A81] text-sm font-bold">See All</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
