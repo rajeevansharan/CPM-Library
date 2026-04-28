@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,22 +8,26 @@ import { useBooks } from '@/context/BooksContext';
 
 export default function UploadBookScreen() {
   const router = useRouter();
-  const { addScriptureBook, addVoiceBook } = useBooks();
+  const { addScriptureBook, addVoiceBook, addPentecostBook } = useBooks();
 
-  const [type, setType] = useState<'scripture' | 'voice'>('scripture');
+  const [type, setType] = useState<'scripture' | 'voice' | 'pentecost'>('scripture');
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
     description: '',
+    author: '',
     grade: 'Grade 1',
     level: 'Beginner',
     year: '2024',
-    month: 'January'
+    month: 'January',
+    pentecostCategory: 'Doctrine',
+    pentecostLanguages: 'English'
   });
 
   const [isGradePickerVisible, setIsGradePickerVisible] = useState(false);
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
+  const [isCategoryPickerVisible, setIsCategoryPickerVisible] = useState(false);
 
   const [coverImage, setCoverImage] = useState<any>(null);
   const [pdfFile, setPdfFile] = useState<any>(null);
@@ -62,7 +66,7 @@ export default function UploadBookScreen() {
           description: formData.description,
           category: 'Grade'
         }, pdfFile?.fileObject, coverImage?.fileObject);
-      } else {
+      } else if (type === 'voice') {
         await addVoiceBook({
           title: formData.title,
           month: formData.month,
@@ -71,11 +75,19 @@ export default function UploadBookScreen() {
           description: formData.description,
           category: "Topic"
         }, pdfFile?.fileObject, coverImage?.fileObject);
+      } else {
+        await addPentecostBook({
+          title: formData.title,
+          author: formData.author,
+          description: formData.description,
+          category: formData.pentecostCategory,
+          languages: formData.pentecostLanguages.split(',').map(l => l.trim()).filter(l => l !== '')
+        }, pdfFile?.fileObject, coverImage?.fileObject);
       }
 
       Alert.alert(
         "Success", 
-        `${type === 'scripture' ? 'Book' : 'Issue'} uploaded successfully!`,
+        `${type === 'scripture' ? 'Book' : (type === 'voice' ? 'Issue' : 'Book')} uploaded successfully!`,
         [{ text: "OK", onPress: () => router.back() }]
       );
     } catch (error) {
@@ -95,20 +107,30 @@ export default function UploadBookScreen() {
         {/* Category Selector */}
         <View className="px-6 mt-6 mb-6">
            <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-3 ml-1">Select Publication Type</Text>
-           <View className="flex-row bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
+            <View className="flex-row bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm flex-wrap">
               <TouchableOpacity 
                 onPress={() => setType('scripture')}
-                className={`flex-1 py-3 rounded-xl flex-row justify-center items-center ${type === 'scripture' ? 'bg-[#203A81]' : ''}`}
+                className={`flex-1 py-3 px-2 rounded-xl flex-row justify-center items-center m-0.5 ${type === 'scripture' ? 'bg-[#203A81]' : ''}`}
+                style={{ minWidth: '30%' }}
               >
-                 <MaterialCommunityIcons name="book-open-page-variant" size={18} color={type === 'scripture' ? 'white' : '#9CA3AF'} className="mr-2" />
-                 <Text className={`font-bold text-sm ${type === 'scripture' ? 'text-white' : 'text-gray-400'}`}>Scripture School</Text>
+                 <MaterialCommunityIcons name="book-open-page-variant" size={16} color={type === 'scripture' ? 'white' : '#9CA3AF'} className="mr-2" />
+                 <Text className={`font-bold text-[10px] ${type === 'scripture' ? 'text-white' : 'text-gray-400'}`}>Scripture</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 onPress={() => setType('voice')}
-                className={`flex-1 py-3 rounded-xl flex-row justify-center items-center ${type === 'voice' ? 'bg-[#203A81]' : ''}`}
+                className={`flex-1 py-3 px-2 rounded-xl flex-row justify-center items-center m-0.5 ${type === 'voice' ? 'bg-[#203A81]' : ''}`}
+                style={{ minWidth: '30%' }}
               >
-                 <MaterialCommunityIcons name="library-shelves" size={18} color={type === 'voice' ? 'white' : '#9CA3AF'} className="mr-2" />
-                 <Text className={`font-bold text-sm ${type === 'voice' ? 'text-white' : 'text-gray-400'}`}>Voice of Pentecost</Text>
+                 <MaterialCommunityIcons name="library-shelves" size={16} color={type === 'voice' ? 'white' : '#9CA3AF'} className="mr-2" />
+                 <Text className={`font-bold text-[10px] ${type === 'voice' ? 'text-white' : 'text-gray-400'}`}>Voice</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={() => setType('pentecost')}
+                className={`flex-1 py-3 px-2 rounded-xl flex-row justify-center items-center m-0.5 ${type === 'pentecost' ? 'bg-[#203A81]' : ''}`}
+                style={{ minWidth: '30%' }}
+              >
+                 <MaterialCommunityIcons name="book-open-variant" size={16} color={type === 'pentecost' ? 'white' : '#9CA3AF'} className="mr-2" />
+                 <Text className={`font-bold text-[10px] ${type === 'pentecost' ? 'text-white' : 'text-gray-400'}`}>Pentecost</Text>
               </TouchableOpacity>
            </View>
         </View>
@@ -132,6 +154,16 @@ export default function UploadBookScreen() {
                onChangeText={(t) => setFormData({...formData, subtitle: t})}
              />
            )}
+           
+           {type === 'pentecost' && (
+             <AdminInput 
+               label="Book Author" 
+               placeholder="e.g. Pastor T. Frederick" 
+               icon="account-edit" 
+               value={formData.author}
+               onChangeText={(t) => setFormData({...formData, author: t})}
+             />
+           )}
 
            <AdminInput 
              label="Detailed Description" 
@@ -146,14 +178,18 @@ export default function UploadBookScreen() {
            <View className="flex-row mb-6">
               <View className="flex-1 mr-2">
                  <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">
-                   {type === 'scripture' ? 'Grade' : 'Month'}
+                   {type === 'scripture' ? 'Grade' : (type === 'voice' ? 'Month' : 'Category')}
                  </Text>
                  <TouchableOpacity 
-                    onPress={() => type === 'scripture' ? setIsGradePickerVisible(true) : setIsMonthPickerVisible(true)}
+                    onPress={() => {
+                      if (type === 'scripture') setIsGradePickerVisible(true);
+                      else if (type === 'voice') setIsMonthPickerVisible(true);
+                      else setIsCategoryPickerVisible(true);
+                    }}
                     className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex-row justify-between items-center"
                  >
                     <Text className="text-[#203A81] text-sm font-bold">
-                      {type === 'scripture' ? formData.grade : formData.month}
+                      {type === 'scripture' ? formData.grade : (type === 'voice' ? formData.month : formData.pentecostCategory)}
                     </Text>
                     <MaterialCommunityIcons name="chevron-down" size={18} color="#203A81" />
                  </TouchableOpacity>
@@ -169,6 +205,19 @@ export default function UploadBookScreen() {
                       <Text className="text-[#203A81] text-sm font-bold">{formData.year}</Text>
                       <MaterialCommunityIcons name="chevron-down" size={18} color="#203A81" />
                    </TouchableOpacity>
+                </View>
+              )}
+
+              {type === 'pentecost' && (
+                <View className="flex-1 ml-2">
+                   <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">Languages</Text>
+                   <TextInput 
+                     placeholder="e.g. English, Sinhala" 
+                     className="bg-white border border-gray-100 rounded-2xl px-4 py-2.5 shadow-sm text-[#203A81] text-xs font-bold"
+                     value={formData.pentecostLanguages}
+                     onChangeText={(t) => setFormData({...formData, pentecostLanguages: t})}
+                     style={{ outlineStyle: 'none' } as any}
+                   />
                 </View>
               )}
            </View>
@@ -254,6 +303,17 @@ export default function UploadBookScreen() {
         onSelect={(val) => setFormData({ ...formData, year: val })}
         title="Select Year"
       />
+      <SelectionPicker 
+        isVisible={isCategoryPickerVisible}
+        onClose={() => setIsCategoryPickerVisible(false)}
+        options={PENTECOST_CATEGORIES}
+        onSelect={(val) => setFormData({ ...formData, pentecostCategory: val })}
+        title="Select Category"
+      />
     </SafeAreaView>
   );
 }
+
+const PENTECOST_CATEGORIES = [
+  'Doctrine', 'Biography', 'Hymns', 'Publications', 'Scripture School', 'General'
+];

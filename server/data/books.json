@@ -1,0 +1,66 @@
+{
+  "scriptureBooks": [
+    {
+      "id": "1777138317990",
+      "title": "test1",
+      "grade": "Grade 5",
+      "description": "test",
+      "fileUrl": "/uploads/1777138317986-Permission request letter for IT 22 DATABASE.pdf",
+      "category": "Grade",
+      "type": "scripture"
+    },
+    {
+      "id": "1777138104384",
+      "title": "R Sharn",
+      "grade": "Grade 4",
+      "description": "Wated life ",
+      "fileUrl": "/uploads/1777138104374-Permission request letter 2 IT STATS.pdf",
+      "category": "Grade",
+      "type": "scripture"
+    },
+    {
+      "id": "1",
+      "title": "Grade 8: Understanding Faith",
+      "grade": "Grade 8",
+      "category": "Grade",
+      "type": "scripture"
+    },
+    {
+      "id": "2",
+      "title": "Grade 12: Foundations of Truth",
+      "grade": "Grade 12",
+      "category": "Grade",
+      "type": "scripture"
+    }
+  ],
+  "voiceBooks": [
+    {
+      "id": "1777140174123",
+      "title": "test ",
+      "month": "January",
+      "year": "2023",
+      "subtitle": "test",
+      "description": "test",
+      "imageUri": "http://localhost:5000/uploads/1777140174115-hero1.png",
+      "fileUrl": "http://localhost:5000/uploads/1777140174093-2025(B23).pdf",
+      "category": "Topic",
+      "type": "voice",
+      "isNew": false
+    }
+  ],
+  "pentecostBooks": [
+    {
+      "id": "1777142540055",
+      "title": "test title ",
+      "author": "test author ",
+      "description": "test description",
+      "category": "Doctrine",
+      "languages": [
+        "English"
+      ],
+      "imageUri": "http://localhost:5000/uploads/1777142540046-Gemini_Generated_Image_lmxqlnlmxqlnlmxq.png",
+      "fileUrl": "http://localhost:5000/uploads/1777142540028-2025(B23).pdf",
+      "type": "pentecost"
+    }
+  ]
+}

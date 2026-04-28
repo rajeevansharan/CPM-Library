@@ -50,7 +50,7 @@ const LoginScreen = () => {
               </View>
               {/* Blue Badge Icon */}
               <View className="absolute -top-1 -right-1 bg-[#203A81] p-1 rounded-full border-2 border-white">
-                <MaterialCommunityIcons name="sparkles" size={12} color="white" />
+                <MaterialCommunityIcons name="star-four-points" size={12} color="white" />
               </View>
             </View>
             <Text className="text-[#203A81] text-2xl font-black tracking-tight uppercase">CPM LIBRARY</Text>

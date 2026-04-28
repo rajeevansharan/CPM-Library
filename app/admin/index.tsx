@@ -8,7 +8,7 @@ import { useBooks } from '@/context/BooksContext';
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { scriptureBooks, voiceBooks } = useBooks();
+  const { scriptureBooks, voiceBooks, pentecostBooks } = useBooks();
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -22,16 +22,22 @@ export default function AdminDashboard() {
         {/* Stats Section */}
         <View className="px-5 pt-6 flex-row">
            <StatCard 
-             title="Scripture Books" 
+             title="Scripture" 
              value={scriptureBooks.length} 
              icon="book-open-page-variant" 
              color="#203A81" 
            />
            <StatCard 
-             title="Voice Issues" 
+             title="Voice" 
              value={voiceBooks.length} 
              icon="library-shelves" 
              color="#C5A059" 
+           />
+           <StatCard 
+             title="Pentecost" 
+             value={pentecostBooks.length} 
+             icon="book-open-variant" 
+             color="#8B5CF6" 
            />
         </View>
 
@@ -59,6 +65,13 @@ export default function AdminDashboard() {
              onPress={() => router.push('/admin/manage-voice')}
              color="#3B82F6"
            />
+
+           <QuickAction 
+             title="Manage Pentecost Books" 
+             icon="book-open-variant" 
+             onPress={() => router.push('/admin/manage-pentecost')}
+             color="#8B5CF6"
+           />
            
            <QuickAction 
              title="User Analytics" 
@@ -78,18 +91,20 @@ export default function AdminDashboard() {
            </View>
 
            {/* Simple Activity List */}
-           {[...scriptureBooks, ...voiceBooks].slice(0, 3).map((item, idx) => (
-             <View key={idx} className="bg-white p-4 rounded-2xl mb-3 flex-row items-center border border-gray-50 shadow-sm">
-                <View className="bg-gray-100 p-2 rounded-lg mr-3">
-                   <MaterialCommunityIcons name="file-document-outline" size={18} color="#9CA3AF" />
-                </View>
-                <View className="flex-1">
-                   <Text className="text-[#203A81] font-bold text-sm" numberOfLines={1}>{item.title}</Text>
-                   <Text className="text-gray-400 text-[10px]">{('level' in item) ? 'Scripture School' : 'Voice of Pentecost'}</Text>
-                </View>
-                <Text className="text-gray-300 text-[9px] font-bold">2h ago</Text>
-             </View>
-           ))}
+            {[...scriptureBooks, ...voiceBooks, ...pentecostBooks].slice(0, 3).map((item, idx) => (
+              <View key={idx} className="bg-white p-4 rounded-2xl mb-3 flex-row items-center border border-gray-50 shadow-sm">
+                 <View className="bg-gray-100 p-2 rounded-lg mr-3">
+                    <MaterialCommunityIcons name="file-document-outline" size={18} color="#9CA3AF" />
+                 </View>
+                 <View className="flex-1">
+                    <Text className="text-[#203A81] font-bold text-sm" numberOfLines={1}>{item.title}</Text>
+                    <Text className="text-gray-400 text-[10px]">
+                      {('level' in item) ? 'Scripture School' : (('month' in item) ? 'Voice of Pentecost' : 'Books of Pentecost')}
+                    </Text>
+                 </View>
+                 <Text className="text-gray-300 text-[9px] font-bold">Just now</Text>
+              </View>
+            ))}
         </View>
 
         {/* System Status */}

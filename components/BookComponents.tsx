@@ -75,7 +75,8 @@ export const BookDetailCard = ({
   category, 
   categoryColor = '#C5A059',
   languages,
-  coverColor = '#1B7A63'
+  coverColor = '#1B7A63',
+  imageUri
 }: { 
   title: string, 
   author: string, 
@@ -83,22 +84,29 @@ export const BookDetailCard = ({
   category: string, 
   categoryColor?: string,
   languages: string[],
-  coverColor?: string
+  coverColor?: string,
+  imageUri?: string
 }) => {
   const router = useRouter();
   return (
     <TouchableOpacity className="bg-white rounded-[24px] mb-4 flex-row shadow-lg shadow-blue-900/5 items-stretch overflow-hidden border border-gray-50 h-52">
       {/* Cover Side */}
-      <View style={{ backgroundColor: coverColor }} className="w-1/3 items-center justify-center p-3 relative">
+      <View style={{ backgroundColor: coverColor }} className="w-1/3 items-center justify-center relative">
          <View className="absolute top-2 left-2 z-10">
             <View style={{ backgroundColor: categoryColor }} className="px-2 py-1 rounded-md">
                <Text className="text-white text-[7px] font-black uppercase">{category}</Text>
             </View>
          </View>
-         <View className="bg-white/10 w-full h-full rounded-md border border-white/20 items-center justify-center">
-            <View className="w-12 h-[2px] bg-white/30 mb-2" />
-            <Text className="text-white text-[8px] font-serif text-center px-2 opacity-60 italic">{title}</Text>
-         </View>
+         {imageUri ? (
+           <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
+         ) : (
+           <View className="p-3 w-full h-full items-center justify-center">
+             <View className="bg-white/10 w-full h-full rounded-md border border-white/20 items-center justify-center">
+                <View className="w-12 h-[2px] bg-white/30 mb-2" />
+                <Text className="text-white text-[8px] font-serif text-center px-2 opacity-60 italic">{title}</Text>
+             </View>
+           </View>
+         )}
       </View>
 
       {/* Content Side */}

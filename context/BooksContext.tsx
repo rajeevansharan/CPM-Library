@@ -25,12 +25,26 @@ export interface VoiceIssue {
   isNew?: boolean;
 }
 
+export interface PentecostBook {
+  id: string;
+  title: string;
+  author: string;
+  description: string;
+  category: string;
+  languages: string[];
+  imageUri?: string;
+  fileUrl?: string;
+  type: 'pentecost';
+}
+
 interface BooksContextType {
   scriptureBooks: ScriptureMaterial[];
   voiceBooks: VoiceIssue[];
-  addScriptureBook: (book: Partial<ScriptureMaterial>, file?: any) => Promise<void>;
-  addVoiceBook: (issue: Partial<VoiceIssue>, file?: any) => Promise<void>;
-  deleteBook: (type: 'scripture' | 'voice', id: string) => Promise<void>;
+  pentecostBooks: PentecostBook[];
+  addScriptureBook: (book: Partial<ScriptureMaterial>, file?: any, coverImage?: any) => Promise<void>;
+  addVoiceBook: (issue: Partial<VoiceIssue>, file?: any, coverImage?: any) => Promise<void>;
+  addPentecostBook: (book: Partial<PentecostBook>, file?: any, coverImage?: any) => Promise<void>;
+  deleteBook: (type: 'scripture' | 'voice' | 'pentecost', id: string) => Promise<void>;
   refreshBooks: () => Promise<void>;
 }
 
@@ -39,13 +53,15 @@ const BooksContext = createContext<BooksContextType | undefined>(undefined);
 export const BooksProvider = ({ children }: { children: ReactNode }) => {
   const [scriptureBooks, setScriptureBooks] = useState<ScriptureMaterial[]>([]);
   const [voiceBooks, setVoiceBooks] = useState<VoiceIssue[]>([]);
+  const [pentecostBooks, setPentecostBooks] = useState<PentecostBook[]>([]);
 
   const refreshBooks = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/books`);
       const data = await response.json();
-      setScriptureBooks(data.scriptureBooks);
-      setVoiceBooks(data.voiceBooks);
+      setScriptureBooks(data.scriptureBooks || []);
+      setVoiceBooks(data.voiceBooks || []);
+      setPentecostBooks(data.pentecostBooks || []);
     } catch (error) {
       console.error("Error fetching books:", error);
     }
@@ -103,7 +119,39 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const deleteBook = async (type: 'scripture' | 'voice', id: string) => {
+  const addPentecostBook = async (book: Partial<PentecostBook>, file?: any, coverImage?: any) => {
+    try {
+      const formData = new FormData();
+      Object.keys(book).forEach(key => {
+        if ((book as any)[key] !== undefined) {
+          if (key === 'languages') {
+            formData.append(key, JSON.stringify((book as any)[key]));
+          } else {
+            formData.append(key, (book as any)[key]);
+          }
+        }
+      });
+      if (file) formData.append('file', file);
+      if (coverImage) formData.append('coverImage', coverImage);
+
+      const response = await fetch(`${API_BASE_URL}/books/pentecost`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        await refreshBooks();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload pentecost book');
+      }
+    } catch (error) {
+      console.error("Error adding pentecost book:", error);
+      throw error;
+    }
+  };
+
+  const deleteBook = async (type: 'scripture' | 'voice' | 'pentecost', id: string) => {
     try {
       const response = await fetch(`${API_BASE_URL}/books/${type}/${id}`, {
         method: 'DELETE',
@@ -118,7 +166,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <BooksContext.Provider value={{ scriptureBooks, voiceBooks, addScriptureBook, addVoiceBook, deleteBook, refreshBooks }}>
+    <BooksContext.Provider value={{ scriptureBooks, voiceBooks, pentecostBooks, addScriptureBook, addVoiceBook, addPentecostBook, deleteBook, refreshBooks }}>
       {children}
     </BooksContext.Provider>
   );

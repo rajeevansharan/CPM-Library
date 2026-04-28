@@ -12,8 +12,11 @@ import {
   FilterChip, 
   BookDetailCard 
 } from '@/components/BookComponents';
+import { useBooks } from '@/context/BooksContext';
 
 export default function BooksOfPentecostScreen() {
+  const { pentecostBooks } = useBooks();
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       {/* Header with blue background */}
@@ -31,7 +34,7 @@ export default function BooksOfPentecostScreen() {
               <View className="flex-row items-center flex-1">
                  <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mr-4">Language</Text>
                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <FilterChip label="English" variant="language" />
+                    <FilterChip label="English" variant="language" active />
                     <FilterChip label="Sinhala" variant="language" />
                     <FilterChip label="Tamil" variant="language" />
                  </ScrollView>
@@ -45,42 +48,25 @@ export default function BooksOfPentecostScreen() {
 
         {/* Books List Section */}
         <View className="px-6 pt-6">
-           <BookDetailCard 
-              title="Foundation of Faith" 
-              author="by Pastor T. Frederick" 
-              description="A comprehensive guide to the apostolic teachings and core beliefs of the mission."
-              category="DOCTRINE" 
-              categoryColor="#C5A059"
-              languages={['English', 'Sinhala']}
-              coverColor="#1B7A63"
-           />
-           <BookDetailCard 
-              title="The Faith of Pioneers" 
-              author="by CPM Historical Society" 
-              description="Inspiring life stories of the founding fathers of the mission and their journey."
-              category="BIOGRAPHY" 
-              categoryColor="#85A1D6"
-              languages={['English']}
-              coverColor="#E6DCC5"
-           />
-           <BookDetailCard 
-              title="Pentecostal Messenger" 
-              author="Monthly Edition - October" 
-              description="Official monthly publication featuring spiritual insights and missionary news."
-              category="PUBLICATIONS" 
-              categoryColor="#D68585"
-              languages={['Tamil', 'Sinhala']}
-              coverColor="#1B7A63"
-           />
-           <BookDetailCard 
-              title="Junior Bible Studies" 
-              author="Lesson Series 4" 
-              description="Easy-to-follow Bible lessons designed for children and junior youth."
-              category="SCRIPTURE SCHOOL" 
-              categoryColor="#85D6A1"
-              languages={['English']}
-              coverColor="#E6DCC5"
-           />
+           {pentecostBooks.length > 0 ? (
+             pentecostBooks.map((book) => (
+               <BookDetailCard 
+                  key={book.id}
+                  title={book.title} 
+                  author={book.author} 
+                  description={book.description}
+                  category={book.category.toUpperCase()} 
+                  categoryColor="#C5A059"
+                  languages={book.languages}
+                  imageUri={book.imageUri}
+               />
+             ))
+           ) : (
+             <View className="items-center justify-center py-20">
+                <MaterialCommunityIcons name="book-open-variant" size={48} color="#D1D5DB" />
+                <Text className="text-gray-400 font-bold mt-4">No books available</Text>
+             </View>
+           )}
         </View>
 
       </ScrollView>
