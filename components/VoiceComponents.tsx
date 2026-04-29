@@ -8,9 +8,18 @@ import { useRouter } from 'expo-router';
  */
 export const VoiceHeader = () => {
   const router = useRouter();
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
+
   return (
     <View className="flex-row items-center justify-between px-6 py-4 bg-white">
-      <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+      <TouchableOpacity onPress={handleBack} className="p-2 -ml-2">
         <MaterialCommunityIcons name="chevron-left" size={28} color="#203A81" />
       </TouchableOpacity>
       <Text className="text-[#203A81] text-lg font-black tracking-tight">Voice Of Pentecost</Text>

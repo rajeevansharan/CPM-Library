@@ -21,10 +21,41 @@ import {
 const LoginScreen = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSignIn = () => {
-    // TODO: Add actual authentication logic here
-    router.replace('/(tabs)');
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      alert('Please enter both email and password');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (data.role === 'ADMIN') {
+          router.replace('/admin'); // Navigate to Admin Portal
+        } else {
+          router.replace('/(tabs)'); // Navigate to User Portal
+        }
+      } else {
+        alert(data.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Could not connect to the server');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGuestMode = () => {
@@ -65,9 +96,11 @@ const LoginScreen = () => {
 
             {/* Form Fields */}
             <InputField 
-              label="Email or Phone Number" 
-              placeholder="e.g. member@cpm.org" 
+              label="Email Address" 
+              placeholder="e.g. admin@cpm.com" 
               icon="account-outline" 
+              value={email}
+              onChangeText={setEmail}
             />
             
             <InputField 
@@ -75,6 +108,8 @@ const LoginScreen = () => {
               placeholder="********" 
               icon="lock-outline" 
               isPassword={true} 
+              value={password}
+              onChangeText={setPassword}
             />
 
             {/* Forgot Password */}
@@ -91,7 +126,7 @@ const LoginScreen = () => {
 
             {/* Primary Action Button */}
             <View className="mt-2">
-              <PrimaryButton title="Sign In" icon="login-variant" onPress={handleSignIn} />
+              <PrimaryButton title={loading ? "Signing In..." : "Sign In"} icon="login-variant" onPress={handleSignIn} />
             </View>
 
             {/* Or Divider */}

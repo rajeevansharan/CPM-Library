@@ -127,6 +127,7 @@ const SelectionPicker = ({
 );
 
 import { useBooks } from '@/context/BooksContext';
+import { Linking } from 'react-native';
 
 export default function ScriptureSchoolScreen() {
   const { scriptureBooks } = useBooks();
@@ -137,13 +138,29 @@ export default function ScriptureSchoolScreen() {
 
   const filteredMaterials = scriptureBooks.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.level.toLowerCase().includes(searchQuery.toLowerCase());
+                          (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
     
     if (selectedGrade === 'All') return matchesSearch;
     
-    // Check if the title starts with the selected grade (e.g. "Grade 8")
-    return matchesSearch && item.title.toLowerCase().includes(selectedGrade.toLowerCase());
+    return matchesSearch && item.grade === selectedGrade;
   });
+
+  const handleViewPdf = (fileUrl?: string) => {
+    if (!fileUrl) {
+      alert('No file available for this book');
+      return;
+    }
+    
+    // Ensure URL is absolute
+    const absoluteUrl = fileUrl.startsWith('http') 
+      ? fileUrl 
+      : `http://localhost:5000${fileUrl}`;
+      
+    Linking.openURL(absoluteUrl).catch(err => {
+      console.error("Failed to open URL:", err);
+      alert('Could not open the PDF');
+    });
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-[#F8F9FB]" edges={['top']}>
@@ -215,11 +232,11 @@ export default function ScriptureSchoolScreen() {
               key={item.id}
               title={item.title} 
               grade={item.grade}
-              level={item.level} 
-              year={item.year} 
-              badge={item.badge} 
+              level="" 
+              year="" 
               imageUri={item.imageUri}
               onDownloadPress={() => setIsExportModalVisible(true)}
+              onViewPress={() => handleViewPdf(item.fileUrl)}
             />
           ))
         ) : (

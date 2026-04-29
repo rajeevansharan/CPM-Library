@@ -164,21 +164,30 @@ export const BookCard = ({ title, author, imageUri }: { title: string, author: s
 /**
  * Featured Publication Card
  */
-export const FeaturedCard = () => {
+export const FeaturedCard = ({ book }: { book?: any }) => {
+  if (!book) {
+    return (
+      <View className="bg-white rounded-[32px] p-8 shadow-xl shadow-blue-900/10 border border-gray-50 items-center justify-center">
+        <Text className="text-gray-400 italic">No featured publication for this month</Text>
+      </View>
+    );
+  }
+
   return (
     <View className="bg-white rounded-[32px] p-5 shadow-xl shadow-blue-900/10 border border-gray-50 flex-row">
       <View className="w-28 h-40 bg-gray-50 rounded-2xl shadow-sm overflow-hidden">
          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=300&auto=format&fit=crop' }}
+            source={{ uri: book.imageUri || 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=300&auto=format&fit=crop' }}
             className="flex-1"
             resizeMode="cover"
          />
       </View>
       <View className="flex-1 ml-5 justify-center">
-        <Text className="text-[#C5A059] text-[9px] font-black uppercase tracking-[1.5px] mb-1">May 2024 Edition</Text>
-        <Text className="text-[#203A81] text-lg font-bold leading-6 mb-2">The Power of Persistent Praise</Text>
+        <Text className="text-[#C5A059] text-[9px] font-black uppercase tracking-[1.5px] mb-1">{book.month} {book.year} Edition</Text>
+        <Text className="text-[#203A81] text-lg font-bold leading-6 mb-1">{book.title}</Text>
+        <Text className="text-[#203A81] text-[10px] font-bold mb-2 italic" numberOfLines={1}>{book.subtitle}</Text>
         <Text className="text-gray-400 text-[10px] leading-4 mb-4" numberOfLines={2}>
-          Explore the spiritual impact of devotion and the theological roots of CPM&apos;s praise...
+          {book.description || 'Discover the latest insights and spiritual teachings in this month\'s edition of Voice of Pentecost.'}
         </Text>
         <TouchableOpacity className="bg-[#203A81] px-6 py-3 rounded-2xl self-start shadow-md shadow-blue-900/30 active:opacity-90">
           <Text className="text-white font-bold text-xs">Read Now</Text>

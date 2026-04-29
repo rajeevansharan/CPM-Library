@@ -8,6 +8,7 @@ export interface ScriptureMaterial {
   grade: string;
   description?: string;
   fileUrl?: string;
+  imageUri?: string;
   category: string;
   type: 'scripture';
 }
@@ -20,6 +21,7 @@ export interface VoiceIssue {
   subtitle: string;
   description?: string;
   fileUrl?: string;
+  imageUri?: string;
   category: string;
   type: 'voice';
   isNew?: boolean;

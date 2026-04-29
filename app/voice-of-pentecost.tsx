@@ -141,8 +141,11 @@ export default function VoiceOfPentecostScreen() {
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
 
   const filteredIssues = voiceBooks.filter(issue => {
-    const matchesSearch = issue.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          issue.subtitle.toLowerCase().includes(searchQuery.toLowerCase());
+    const title = issue.title || '';
+    const subtitle = issue.subtitle || '';
+    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          subtitle.toLowerCase().includes(searchQuery.toLowerCase());
+    
     const matchesMonth = selectedMonth ? issue.month === selectedMonth : true;
     const matchesYear = selectedYear ? issue.year === selectedYear : true;
     

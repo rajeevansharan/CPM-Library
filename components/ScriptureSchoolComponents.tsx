@@ -8,9 +8,18 @@ import { useRouter } from 'expo-router';
  */
 export const ScriptureHeader = () => {
   const router = useRouter();
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
+
   return (
     <View className="flex-row items-center justify-between px-6 py-4 bg-white">
-      <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+      <TouchableOpacity onPress={handleBack} className="p-2 -ml-2">
         <MaterialCommunityIcons name="chevron-left" size={28} color="#203A81" />
       </TouchableOpacity>
       <Text className="text-[#203A81] text-lg font-black tracking-tight uppercase">Scripture School</Text>
@@ -60,7 +69,8 @@ export const MaterialCard = ({
   year, 
   badge, 
   imageUri,
-  onDownloadPress
+  onDownloadPress,
+  onViewPress
 }: { 
   title: string, 
   grade?: string,
@@ -68,10 +78,11 @@ export const MaterialCard = ({
   year: string, 
   badge?: string,
   imageUri?: string,
-  onDownloadPress?: () => void
+  onDownloadPress?: () => void,
+  onViewPress?: () => void
 }) => {
   return (
-    <TouchableOpacity className="bg-white rounded-3xl p-4 mb-4 flex-row items-center shadow-lg shadow-blue-900/5 border border-gray-50 mx-4">
+    <View className="bg-white rounded-3xl p-4 mb-4 flex-row items-center shadow-lg shadow-blue-900/5 border border-gray-50 mx-4">
       {/* Thumbnail */}
       <View className="w-20 h-28 bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
         <Image 
@@ -90,14 +101,18 @@ export const MaterialCard = ({
           </View>
         </View>
 
-        <TouchableOpacity className="flex-row items-center" onPress={onDownloadPress}>
-          <MaterialCommunityIcons name="download" size={14} color="#203A81" />
-          <Text className="text-[#203A81] font-black text-[10px] ml-1 uppercase tracking-widest">Download PDF</Text>
-        </TouchableOpacity>
-      </View>
+        <View className="flex-row items-center">
+          <TouchableOpacity className="flex-row items-center mr-6" onPress={onViewPress}>
+            <MaterialCommunityIcons name="eye-outline" size={14} color="#C5A059" />
+            <Text className="text-[#C5A059] font-black text-[10px] ml-1 uppercase tracking-widest">View PDF</Text>
+          </TouchableOpacity>
 
-      {/* Chevron */}
-      <MaterialCommunityIcons name="chevron-right" size={24} color="#D1D5DB" className="ml-2" />
-    </TouchableOpacity>
+          <TouchableOpacity className="flex-row items-center" onPress={onDownloadPress}>
+            <MaterialCommunityIcons name="download" size={14} color="#203A81" />
+            <Text className="text-[#203A81] font-black text-[10px] ml-1 uppercase tracking-widest">Download</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   );
 };

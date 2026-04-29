@@ -15,7 +15,23 @@ import {
   FeaturedCard 
 } from '@/components/HomeComponents';
 
+import { useBooks } from '@/context/BooksContext';
+
 export default function HomeScreen() {
+  const { scriptureBooks, voiceBooks, pentecostBooks } = useBooks();
+
+  // Combine and sort by date (descending)
+  const recentUploads = [
+    ...scriptureBooks.map(b => ({ ...b, author: b.grade || 'Scripture School' })),
+    ...pentecostBooks.map(b => ({ ...b, author: b.author || 'Pentecost Books' }))
+  ]
+  .sort((a, b) => {
+    const dateA = new Date((a as any).createdAt || 0).getTime();
+    const dateB = new Date((b as any).createdAt || 0).getTime();
+    return dateB - dateA;
+  })
+  .slice(0, 10); // Take top 10 newest items across all categories
+
   return (
     <SafeAreaView className="flex-1 bg-[#F8F9FB]" edges={['top']}>
       <ScrollView 
@@ -65,23 +81,48 @@ export default function HomeScreen() {
         <View className="px-4 mb-8">
           <View className="flex-row justify-between items-end mb-5">
             <Text className="text-[#203A81] text-xl font-bold">Recent Uploads</Text>
-          {/*  <TouchableOpacity>
-              <Text className="text-[#203A81] text-sm font-bold">See All</Text>
-            </TouchableOpacity> */}
           </View>
           
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <BookCard title="Steps to Salvation" author="Ministry Staff" />
-            <BookCard title="Early Church Truth" author="History Dept." />
-            <BookCard title="The Holy Ghost" author="CPM Elders" />
-            <BookCard title="Living Water" author="Archive Team" />
+            {recentUploads.length > 0 ? (
+              recentUploads.map((book) => (
+                <BookCard 
+                  key={`${book.type}-${book.id}`} 
+                  title={book.title} 
+                  author={book.author} 
+                  imageUri={(book as any).imageUri}
+                />
+              ))
+            ) : (
+              <View className="py-4 px-2">
+                <Text className="text-gray-400 italic">No recent uploads available</Text>
+              </View>
+            )}
           </ScrollView>
         </View>
 
         {/* Featured Publication Section */}
         <View className="px-4 mb-6">
           <Text className="text-[#203A81] text-lg font-bold mb-4">Monthly Featured Publication</Text>
-          <FeaturedCard />
+          {(() => {
+            const now = new Date();
+            const currentMonth = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][now.getMonth()];
+            const currentYear = now.getFullYear().toString();
+
+            // Find book for current month/year
+            let featuredBook = voiceBooks.find(b => b.month === currentMonth && b.year === currentYear);
+            
+            // Fallback: If no book for current month, take the absolute newest Voice of Pentecost book
+            if (!featuredBook && voiceBooks.length > 0) {
+              featuredBook = [...voiceBooks].sort((a, b) => {
+                const dateA = new Date((a as any).createdAt || 0).getTime();
+                const dateB = new Date((b as any).createdAt || 0).getTime();
+                return dateB - dateA;
+              })[0];
+            }
+
+            return <FeaturedCard book={featuredBook} />;
+          })()}
         </View>
 
       </ScrollView>

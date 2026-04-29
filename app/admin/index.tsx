@@ -10,9 +10,13 @@ export default function AdminDashboard() {
   const router = useRouter();
   const { scriptureBooks, voiceBooks, pentecostBooks } = useBooks();
 
+  const handleLogout = () => {
+    router.replace('/login');
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-      <AdminHeader title="Admin Dashboard" />
+      <AdminHeader title="Admin Dashboard" onLogout={handleLogout} />
 
       <ScrollView 
         className="flex-1 bg-[#F8F9FB]" 

@@ -20,7 +20,10 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
 // ─── Routes ─────────────────────────────────────────────────────────────────────
 const booksRouter = require('./routes/books');
+const authRouter = require('./routes/auth');
+
 app.use('/api/books', booksRouter);
+app.use('/api/auth', authRouter);
 
 // ─── Health Check ───────────────────────────────────────────────────────────────
 app.get('/api/health', async (req, res) => {

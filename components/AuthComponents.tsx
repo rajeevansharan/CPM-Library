@@ -9,12 +9,16 @@ export const InputField = ({
   label, 
   placeholder, 
   icon, 
+  value,
+  onChangeText,
   isPassword = false, 
   optional = false 
 }: { 
   label: string; 
   placeholder: string; 
   icon?: string; 
+  value?: string;
+  onChangeText?: (text: string) => void;
   isPassword?: boolean;
   optional?: boolean;
 }) => {
@@ -35,8 +39,11 @@ export const InputField = ({
         <TextInput
           placeholder={placeholder}
           secureTextEntry={isPassword}
+          value={value}
+          onChangeText={onChangeText}
           className="flex-1 text-gray-700 text-sm h-5"
           placeholderTextColor="#9CA3AF"
+          style={{ outlineStyle: 'none' } as any}
         />
       </View>
     </View>

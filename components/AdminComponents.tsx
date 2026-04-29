@@ -21,7 +21,7 @@ export const StatCard = ({ title, value, icon, color }: { title: string, value: 
 /**
  * Admin Header Component
  */
-export const AdminHeader = ({ title, showBack = false, onBack }: { title: string, showBack?: boolean, onBack?: () => void }) => (
+export const AdminHeader = ({ title, showBack = false, onBack, onLogout }: { title: string, showBack?: boolean, onBack?: () => void, onLogout?: () => void }) => (
   <View className="px-6 pt-4 pb-2 bg-white flex-row items-center justify-between">
     <View className="flex-row items-center">
       {showBack && (
@@ -34,9 +34,16 @@ export const AdminHeader = ({ title, showBack = false, onBack }: { title: string
         <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mt-0.5">Admin Management</Text>
       </View>
     </View>
-    <TouchableOpacity className="bg-[#203A81] p-2 rounded-full shadow-lg shadow-blue-900/20">
-      <MaterialCommunityIcons name="shield-check" size={18} color="white" />
-    </TouchableOpacity>
+    <View className="flex-row items-center">
+      {onLogout && (
+        <TouchableOpacity onPress={onLogout} className="bg-red-50 p-2 rounded-full mr-2">
+          <MaterialCommunityIcons name="logout" size={18} color="#EF4444" />
+        </TouchableOpacity>
+      )}
+      <TouchableOpacity className="bg-[#203A81] p-2 rounded-full shadow-lg shadow-blue-900/20">
+        <MaterialCommunityIcons name="shield-check" size={18} color="white" />
+      </TouchableOpacity>
+    </View>
   </View>
 );
 

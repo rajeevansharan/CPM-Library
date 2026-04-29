@@ -97,7 +97,17 @@ export default function UploadBookScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-      <AdminHeader title="Upload Publication" showBack onBack={() => router.back()} />
+      <AdminHeader 
+        title="Upload Publication" 
+        showBack 
+        onBack={() => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace('/admin');
+          }
+        }} 
+      />
 
       <ScrollView 
         className="flex-1 bg-[#F8F9FB]" 

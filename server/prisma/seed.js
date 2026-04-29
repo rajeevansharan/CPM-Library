@@ -1,8 +1,8 @@
 /**
  * Seed script — migrates existing data/books.json into PostgreSQL
+ * and sets up mock admin/user accounts.
  * 
- * Run with: npx prisma db seed
- * Or directly: node prisma/seed.js
+ * Run with: npm run db:seed
  */
 
 const { PrismaClient } = require('@prisma/client');
@@ -12,21 +12,46 @@ const path = require('path');
 const prisma = new PrismaClient();
 
 async function main() {
+  // ─── Seed Users ───────────────────────────────────────────────────────────
+  console.log('Seeding users...');
+  
+  const users = [
+    {
+      email: 'admin@cpm.com',
+      password: 'admin123', // In production, use hashed passwords
+      role: 'ADMIN',
+      name: 'CPM Admin'
+    },
+    {
+      email: 'user@cpm.com',
+      password: 'user123',
+      role: 'USER',
+      name: 'CPM Member'
+    }
+  ];
+
+  for (const u of users) {
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: {},
+      create: u
+    });
+  }
+  console.log('  ✓ Users seeded (admin@cpm.com / user@cpm.com)');
+
+  // ─── Seed Books from books.json ───────────────────────────────────────────
   const BOOKS_FILE = path.join(__dirname, '..', 'data', 'books.json');
 
   if (!fs.existsSync(BOOKS_FILE)) {
-    console.log('No books.json found — skipping seed.');
+    console.log('No books.json found — skipping book seed.');
     return;
   }
 
   const raw = fs.readFileSync(BOOKS_FILE, 'utf-8');
   const data = JSON.parse(raw);
 
-  console.log('Starting database seed...');
-  console.log(`  Scripture books: ${(data.scriptureBooks || []).length}`);
-  console.log(`  Voice books:     ${(data.voiceBooks || []).length}`);
-  console.log(`  Pentecost books: ${(data.pentecostBooks || []).length}`);
-
+  console.log('Seeding books from JSON...');
+  
   // ── Seed Scripture Books ───────────────────────────────────────────────
   for (const book of (data.scriptureBooks || [])) {
     await prisma.scriptureBook.upsert({
@@ -44,7 +69,7 @@ async function main() {
       },
     });
   }
-  console.log('  ✓ Scripture books seeded');
+  console.log(`  ✓ ${(data.scriptureBooks || []).length} Scripture books seeded`);
 
   // ── Seed Voice Books ───────────────────────────────────────────────────
   for (const book of (data.voiceBooks || [])) {
@@ -66,7 +91,7 @@ async function main() {
       },
     });
   }
-  console.log('  ✓ Voice books seeded');
+  console.log(`  ✓ ${(data.voiceBooks || []).length} Voice books seeded`);
 
   // ── Seed Pentecost Books ───────────────────────────────────────────────
   for (const book of (data.pentecostBooks || [])) {
@@ -86,9 +111,9 @@ async function main() {
       },
     });
   }
-  console.log('  ✓ Pentecost books seeded');
+  console.log(`  ✓ ${(data.pentecostBooks || []).length} Pentecost books seeded`);
 
-  console.log('\nSeed completed successfully!');
+  console.log('\nAll seeding completed successfully!');
 }
 
 main()
