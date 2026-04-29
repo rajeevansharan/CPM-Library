@@ -24,7 +24,8 @@ router.post('/login', async (req, res) => {
       id: user.id,
       email: user.email,
       role: user.role,
-      name: user.name
+      name: user.name,
+      memberId: user.memberId
     });
   } catch (error) {
     console.error('Login error:', error);

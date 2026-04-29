@@ -20,13 +20,15 @@ async function main() {
       email: 'admin@cpm.com',
       password: 'admin123', // In production, use hashed passwords
       role: 'ADMIN',
-      name: 'CPM Admin'
+      name: 'CPM Admin',
+      memberId: 'CPM-0001-AD'
     },
     {
       email: 'user@cpm.com',
       password: 'user123',
       role: 'USER',
-      name: 'CPM Member'
+      name: 'Daniel Wickramasinghe',
+      memberId: 'CPM-7782-SL'
     }
   ];
 

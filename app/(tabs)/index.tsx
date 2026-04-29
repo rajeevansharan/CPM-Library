@@ -109,16 +109,24 @@ export default function HomeScreen() {
             const currentMonth = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][now.getMonth()];
             const currentYear = now.getFullYear().toString();
 
-            // Find book for current month/year
+            // 1. Try to find Voice book for current month/year
             let featuredBook = voiceBooks.find(b => b.month === currentMonth && b.year === currentYear);
             
-            // Fallback: If no book for current month, take the absolute newest Voice of Pentecost book
-            if (!featuredBook && voiceBooks.length > 0) {
-              featuredBook = [...voiceBooks].sort((a, b) => {
-                const dateA = new Date((a as any).createdAt || 0).getTime();
-                const dateB = new Date((b as any).createdAt || 0).getTime();
-                return dateB - dateA;
-              })[0];
+            // 2. Fallback: If no book for current month, take the absolute newest book across ALL categories
+            if (!featuredBook) {
+              const allBooks = [
+                ...scriptureBooks.map(b => ({ ...b, author: b.grade || 'Scripture School' })),
+                ...voiceBooks.map(b => ({ ...b, author: b.subtitle || 'Voice of Pentecost' })),
+                ...pentecostBooks.map(b => ({ ...b, author: b.author || 'Pentecost Books' }))
+              ];
+
+              if (allBooks.length > 0) {
+                featuredBook = allBooks.sort((a, b) => {
+                  const dateA = new Date((a as any).createdAt || 0).getTime();
+                  const dateB = new Date((b as any).createdAt || 0).getTime();
+                  return dateB - dateA;
+                })[0] as any;
+              }
             }
 
             return <FeaturedCard book={featuredBook} />;

@@ -12,6 +12,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 SplashScreen.preventAutoHideAsync();
 
 import { BooksProvider } from '@/context/BooksContext';
+import { AuthProvider } from '@/context/AuthContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -37,27 +38,29 @@ export default function RootLayout() {
   }
 
   return (
-    <BooksProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}
-          initialRouteName="index"
-        >
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="scripture-school" options={{ headerShown: false }} />
-          <Stack.Screen name="concordance" options={{ headerShown: false }} />
-          <Stack.Screen name="books-of-pentecost" options={{ headerShown: false }} />
-          <Stack.Screen name="voice-of-pentecost" options={{ headerShown: false }} />
-          <Stack.Screen name="publication-detail" options={{ headerShown: false }} />
-          <Stack.Screen name="profile" options={{ headerShown: false }} />
-          <Stack.Screen name="splash" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          <Stack.Screen name="admin/index" options={{ headerShown: false }} />
-          <Stack.Screen name="admin/upload" options={{ headerShown: false }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </BooksProvider>
+    <AuthProvider>
+      <BooksProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack screenOptions={{ headerShown: false }}
+            initialRouteName="index"
+          >
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="scripture-school" options={{ headerShown: false }} />
+            <Stack.Screen name="concordance" options={{ headerShown: false }} />
+            <Stack.Screen name="books-of-pentecost" options={{ headerShown: false }} />
+            <Stack.Screen name="voice-of-pentecost" options={{ headerShown: false }} />
+            <Stack.Screen name="publication-detail" options={{ headerShown: false }} />
+            <Stack.Screen name="profile" options={{ headerShown: false }} />
+            <Stack.Screen name="splash" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+            <Stack.Screen name="admin/index" options={{ headerShown: false }} />
+            <Stack.Screen name="admin/upload" options={{ headerShown: false }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </BooksProvider>
+    </AuthProvider>
   );
 }

@@ -14,13 +14,15 @@ import {
   MenuItem, 
   SignOutButton 
 } from '@/components/ProfileComponents';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { user, logout } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
 
-  const handleSignOut = () => {
-    // Navigate back to login
+  const handleSignOut = async () => {
+    await logout();
     router.replace('/login');
   };
 
@@ -35,8 +37,8 @@ export default function ProfileScreen() {
       >
         {/* Profile User Info */}
         <ProfileInfo 
-          name="Daniel Wickramasinghe" 
-          memberId="Member ID: CPM-7782-SL" 
+          name={user?.name || "Guest User"} 
+          memberId={user?.memberId ? `Member ID: ${user.memberId}` : "Guest Mode"} 
         />
 
         {/* My Library Section */}
@@ -69,18 +71,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Administrative Section */}
-        <View className="px-6 mb-8">
-          <Text className="text-gray-400 text-[10px] font-black uppercase tracking-[1.5px] mb-4">Administrative</Text>
-          <View className="bg-white rounded-[32px] px-5 py-2 shadow-lg shadow-blue-900/5 border border-gray-50">
-             <MenuItem 
-                icon="shield-account-outline" 
-                title="Admin Portal" 
-                subtitle="Manage library content"
-                onPress={() => router.push('/admin')}
-             />
-          </View>
-        </View>
+
 
         {/* Sign Out Action */}
         <SignOutButton onPress={handleSignOut} />

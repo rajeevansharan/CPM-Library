@@ -1,19 +1,33 @@
 const express = require('express');
 const multer = require('multer');
+const streamifier = require('streamifier');
 const prisma = require('../lib/prisma');
+const cloudinary = require('../lib/cloudinary');
 
 const router = express.Router();
 
-// ─── Multer Storage Config ─────────────────────────────────────────────────────
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
-});
+// ─── Multer Storage Config (Memory Storage) ───────────────────────────────────
+// We use memory storage to keep the file in buffer before streaming to Cloudinary
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+/**
+ * Helper to upload a buffer to Cloudinary via stream
+ */
+const uploadToCloudinary = (buffer, options) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      options,
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+    streamifier.createReadStream(buffer).pipe(uploadStream);
+  });
+};
+
 // ─── GET all books ─────────────────────────────────────────────────────────────
-// Returns the exact same shape as the old JSON file:
-// { scriptureBooks: [...], voiceBooks: [...], pentecostBooks: [...] }
 router.get('/', async (req, res) => {
   try {
     const [scriptureBooks, voiceBooks, pentecostBooks] = await Promise.all([
@@ -38,12 +52,26 @@ router.post('/scripture', upload.fields([
     const { title, grade, description } = req.body;
     const files = req.files;
 
-    const coverImageUrl = files.coverImage
-      ? `http://localhost:${process.env.PORT || 5000}/uploads/${files.coverImage[0].filename}`
-      : null;
-    const fileUrl = files.file
-      ? `http://localhost:${process.env.PORT || 5000}/uploads/${files.file[0].filename}`
-      : null;
+    let coverImageUrl = null;
+    let fileUrl = null;
+
+    // 1. Upload Cover Image to Cloudinary
+    if (files.coverImage) {
+      const result = await uploadToCloudinary(files.coverImage[0].buffer, {
+        folder: 'cpm_library/covers',
+        resource_type: 'image'
+      });
+      coverImageUrl = result.secure_url;
+    }
+
+    // 2. Upload PDF File to Cloudinary
+    if (files.file) {
+      const result = await uploadToCloudinary(files.file[0].buffer, {
+        folder: 'cpm_library/publications',
+        resource_type: 'raw' // Important for non-image files like PDF
+      });
+      fileUrl = result.secure_url;
+    }
 
     const newBook = await prisma.scriptureBook.create({
       data: {
@@ -73,12 +101,24 @@ router.post('/voice', upload.fields([
     const { title, month, year, subtitle, description } = req.body;
     const files = req.files;
 
-    const coverImageUrl = files.coverImage
-      ? `http://localhost:${process.env.PORT || 5000}/uploads/${files.coverImage[0].filename}`
-      : null;
-    const fileUrl = files.file
-      ? `http://localhost:${process.env.PORT || 5000}/uploads/${files.file[0].filename}`
-      : null;
+    let coverImageUrl = null;
+    let fileUrl = null;
+
+    if (files.coverImage) {
+      const result = await uploadToCloudinary(files.coverImage[0].buffer, {
+        folder: 'cpm_library/covers',
+        resource_type: 'image'
+      });
+      coverImageUrl = result.secure_url;
+    }
+
+    if (files.file) {
+      const result = await uploadToCloudinary(files.file[0].buffer, {
+        folder: 'cpm_library/publications',
+        resource_type: 'raw'
+      });
+      fileUrl = result.secure_url;
+    }
 
     const newIssue = await prisma.voiceBook.create({
       data: {
@@ -111,12 +151,24 @@ router.post('/pentecost', upload.fields([
     const { title, author, description, category, languages } = req.body;
     const files = req.files;
 
-    const coverImageUrl = files.coverImage
-      ? `http://localhost:${process.env.PORT || 5000}/uploads/${files.coverImage[0].filename}`
-      : null;
-    const fileUrl = files.file
-      ? `http://localhost:${process.env.PORT || 5000}/uploads/${files.file[0].filename}`
-      : null;
+    let coverImageUrl = null;
+    let fileUrl = null;
+
+    if (files.coverImage) {
+      const result = await uploadToCloudinary(files.coverImage[0].buffer, {
+        folder: 'cpm_library/covers',
+        resource_type: 'image'
+      });
+      coverImageUrl = result.secure_url;
+    }
+
+    if (files.file) {
+      const result = await uploadToCloudinary(files.file[0].buffer, {
+        folder: 'cpm_library/publications',
+        resource_type: 'raw'
+      });
+      fileUrl = result.secure_url;
+    }
 
     const newBook = await prisma.pentecostBook.create({
       data: {

@@ -183,11 +183,15 @@ export const FeaturedCard = ({ book }: { book?: any }) => {
          />
       </View>
       <View className="flex-1 ml-5 justify-center">
-        <Text className="text-[#C5A059] text-[9px] font-black uppercase tracking-[1.5px] mb-1">{book.month} {book.year} Edition</Text>
+        {book.month && book.year ? (
+          <Text className="text-[#C5A059] text-[9px] font-black uppercase tracking-[1.5px] mb-1">{book.month} {book.year} Edition</Text>
+        ) : (
+          <Text className="text-[#C5A059] text-[9px] font-black uppercase tracking-[1.5px] mb-1">Latest Publication</Text>
+        )}
         <Text className="text-[#203A81] text-lg font-bold leading-6 mb-1">{book.title}</Text>
-        <Text className="text-[#203A81] text-[10px] font-bold mb-2 italic" numberOfLines={1}>{book.subtitle}</Text>
+        <Text className="text-[#203A81] text-[10px] font-bold mb-2 italic" numberOfLines={1}>{book.subtitle || book.author}</Text>
         <Text className="text-gray-400 text-[10px] leading-4 mb-4" numberOfLines={2}>
-          {book.description || 'Discover the latest insights and spiritual teachings in this month\'s edition of Voice of Pentecost.'}
+          {book.description || `Discover the latest insights and spiritual teachings in "${book.title}".`}
         </Text>
         <TouchableOpacity className="bg-[#203A81] px-6 py-3 rounded-2xl self-start shadow-md shadow-blue-900/30 active:opacity-90">
           <Text className="text-white font-bold text-xs">Read Now</Text>

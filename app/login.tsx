@@ -17,9 +17,11 @@ import {
   TabToggle, 
   GuestModeCard 
 } from '../components/AuthComponents';
+import { useAuth } from '@/context/AuthContext';
 
 const LoginScreen = () => {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,6 +44,7 @@ const LoginScreen = () => {
       const data = await response.json();
 
       if (response.ok) {
+        setUser(data);
         if (data.role === 'ADMIN') {
           router.replace('/admin'); // Navigate to Admin Portal
         } else {
