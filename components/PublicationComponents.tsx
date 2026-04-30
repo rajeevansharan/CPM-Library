@@ -43,14 +43,17 @@ export const StatItem = ({ label, value }: { label: string, value: string }) => 
 export const ActionButton = ({ 
   icon, 
   label, 
-  primary = false 
+  primary = false,
+  onPress
 }: { 
   icon: string, 
   label: string, 
-  primary?: boolean 
+  primary?: boolean,
+  onPress?: () => void
 }) => {
   return (
     <TouchableOpacity 
+      onPress={onPress}
       className="flex-row items-center justify-center py-4 rounded-2xl"
       style={[
         {

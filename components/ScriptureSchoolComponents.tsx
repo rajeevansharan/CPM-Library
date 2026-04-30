@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -69,22 +69,28 @@ export const MaterialCard = ({
   year, 
   badge, 
   imageUri,
+  subtitle,
+  author,
+  description,
   onDownloadPress,
   onViewPress
 }: { 
   title: string, 
   grade?: string,
-  level: string, 
-  year: string, 
+  level?: string, 
+  year?: string, 
   badge?: string,
   imageUri?: string,
+  subtitle?: string,
+  author?: string,
+  description?: string,
   onDownloadPress?: () => void,
   onViewPress?: () => void
 }) => {
   return (
     <View className="bg-white rounded-3xl p-4 mb-4 flex-row items-center shadow-lg shadow-blue-900/5 border border-gray-50 mx-4">
       {/* Thumbnail */}
-      <View className="w-20 h-28 bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
+      <View className="w-24 h-32 bg-gray-100 rounded-2xl overflow-hidden border border-gray-100">
         <Image 
           source={{ uri: imageUri || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=200&auto=format&fit=crop' }}
           className="flex-1"
@@ -95,21 +101,37 @@ export const MaterialCard = ({
       {/* Info */}
       <View className="flex-1 ml-4 justify-between py-1">
         <View>
-          {grade && <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">{grade}</Text>}
-          <View className="flex-row items-center justify-between mb-4">
+          {(grade || author) && (
+            <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">
+              {grade || author}
+            </Text>
+          )}
+          <View className="flex-row items-center justify-between mb-1">
             <Text className="text-[#203A81] font-bold text-base flex-1 mr-2" numberOfLines={2}>{title}</Text>
           </View>
+          {subtitle && (
+            <Text className="text-gray-500 text-xs font-medium mb-1 italic" numberOfLines={1}>{subtitle}</Text>
+          )}
+          {description && (
+            <Text className="text-gray-400 text-[10px] mb-2 leading-relaxed" numberOfLines={2}>{description}</Text>
+          )}
         </View>
 
-        <View className="flex-row items-center">
-          <TouchableOpacity className="flex-row items-center mr-6" onPress={onViewPress}>
+        <View className="flex-row items-center mt-2">
+          <TouchableOpacity 
+            className="flex-row items-center mr-6 bg-[#C5A059]/10 px-3 py-1.5 rounded-full" 
+            onPress={onViewPress}
+          >
             <MaterialCommunityIcons name="eye-outline" size={14} color="#C5A059" />
-            <Text className="text-[#C5A059] font-black text-[10px] ml-1 uppercase tracking-widest">View PDF</Text>
+            <Text className="text-[#C5A059] font-black text-[9px] ml-1 uppercase tracking-widest">View PDF</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row items-center" onPress={onDownloadPress}>
+          <TouchableOpacity 
+            className="flex-row items-center bg-[#203A81]/5 px-3 py-1.5 rounded-full" 
+            onPress={onDownloadPress}
+          >
             <MaterialCommunityIcons name="download" size={14} color="#203A81" />
-            <Text className="text-[#203A81] font-black text-[10px] ml-1 uppercase tracking-widest">Download</Text>
+            <Text className="text-[#203A81] font-black text-[9px] ml-1 uppercase tracking-widest">Download</Text>
           </TouchableOpacity>
         </View>
       </View>

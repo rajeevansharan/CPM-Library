@@ -145,9 +145,9 @@ export const CategoryChip = ({ label, active = false }: { label: string, active?
 /**
  * Book Card for Recent Uploads
  */
-export const BookCard = ({ title, author, imageUri }: { title: string, author: string, imageUri?: string }) => {
+export const BookCard = ({ title, author, imageUri, onPress }: { title: string, author: string, imageUri?: string, onPress?: () => void }) => {
   return (
-    <TouchableOpacity className="mr-5 w-32">
+    <TouchableOpacity className="mr-5 w-32" onPress={onPress}>
       <View className="w-32 h-44 bg-white rounded-2xl shadow-sm border border-gray-100 mb-3 overflow-hidden">
         <Image 
           source={{ uri: imageUri || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=300&auto=format&fit=crop' }}
@@ -164,7 +164,7 @@ export const BookCard = ({ title, author, imageUri }: { title: string, author: s
 /**
  * Featured Publication Card
  */
-export const FeaturedCard = ({ book }: { book?: any }) => {
+export const FeaturedCard = ({ book, onPress }: { book?: any, onPress?: () => void }) => {
   if (!book) {
     return (
       <View className="bg-white rounded-[32px] p-8 shadow-xl shadow-blue-900/10 border border-gray-50 items-center justify-center">
@@ -193,7 +193,10 @@ export const FeaturedCard = ({ book }: { book?: any }) => {
         <Text className="text-gray-400 text-[10px] leading-4 mb-4" numberOfLines={2}>
           {book.description || `Discover the latest insights and spiritual teachings in "${book.title}".`}
         </Text>
-        <TouchableOpacity className="bg-[#203A81] px-6 py-3 rounded-2xl self-start shadow-md shadow-blue-900/30 active:opacity-90">
+        <TouchableOpacity 
+          className="bg-[#203A81] px-6 py-3 rounded-2xl self-start shadow-md shadow-blue-900/30 active:opacity-90"
+          onPress={onPress}
+        >
           <Text className="text-white font-bold text-xs">Read Now</Text>
         </TouchableOpacity>
       </View>

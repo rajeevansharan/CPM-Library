@@ -76,7 +76,8 @@ export const BookDetailCard = ({
   categoryColor = '#C5A059',
   languages,
   coverColor = '#1B7A63',
-  imageUri
+  imageUri,
+  fileUrl
 }: { 
   title: string, 
   author: string, 
@@ -85,7 +86,8 @@ export const BookDetailCard = ({
   categoryColor?: string,
   languages: string[],
   coverColor?: string,
-  imageUri?: string
+  imageUri?: string,
+  fileUrl?: string
 }) => {
   const router = useRouter();
   return (
@@ -122,8 +124,11 @@ export const BookDetailCard = ({
               <MaterialCommunityIcons name="translate" size={14} color="#9CA3AF" />
               <Text className="text-gray-400 text-[9px] ml-1 font-medium">{languages.join(', ')}</Text>
            </View>
-           <TouchableOpacity 
-              onPress={() => router.push('/publication-detail')}
+            <TouchableOpacity 
+              onPress={() => router.push({
+                pathname: '/publication-detail',
+                params: { title, fileUrl: (arguments[0] as any).fileUrl, description, author, imageUri } 
+              })}
               className="bg-[#203A81] px-5 py-2.5 rounded-xl"
            >
               <Text className="text-white font-bold text-xs">Read Now</Text>

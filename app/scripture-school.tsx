@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { 
   ScriptureHeader, 
   FilterPill, 
@@ -130,6 +131,7 @@ import { useBooks } from '@/context/BooksContext';
 import { Linking } from 'react-native';
 
 export default function ScriptureSchoolScreen() {
+  const router = useRouter();
   const { scriptureBooks } = useBooks();
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
   const [isGradePickerVisible, setIsGradePickerVisible] = useState(false);
@@ -155,10 +157,14 @@ export default function ScriptureSchoolScreen() {
     const absoluteUrl = fileUrl.startsWith('http') 
       ? fileUrl 
       : `http://localhost:5000${fileUrl}`;
-      
-    Linking.openURL(absoluteUrl).catch(err => {
-      console.error("Failed to open URL:", err);
-      alert('Could not open the PDF');
+
+    // Navigate to the internal PDF viewer
+    router.push({
+      pathname: '/pdf-viewer',
+      params: { 
+        url: absoluteUrl,
+        title: 'Scripture School Publication'
+      }
     });
   };
 

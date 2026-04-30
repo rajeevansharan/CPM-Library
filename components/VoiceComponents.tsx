@@ -37,15 +37,17 @@ export const IssueCard = ({
   title, 
   subtitle, 
   imageUri, 
-  isNew = false 
+  isNew = false,
+  onPress
 }: { 
   title: string, 
   subtitle: string, 
   imageUri: string, 
-  isNew?: boolean 
+  isNew?: boolean,
+  onPress?: () => void
 }) => {
   return (
-    <TouchableOpacity className="w-[48%] mb-6">
+    <TouchableOpacity className="w-[48%] mb-6" onPress={onPress}>
       <View className="relative">
         <Image 
           source={{ uri: imageUri }} 

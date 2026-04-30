@@ -6,6 +6,7 @@ import {
   TouchableOpacity 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { 
   SearchHeader, 
   VerseOfTheDay, 
@@ -18,6 +19,7 @@ import {
 import { useBooks } from '@/context/BooksContext';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const { scriptureBooks, voiceBooks, pentecostBooks } = useBooks();
 
   // Combine and sort by date (descending)
@@ -31,6 +33,25 @@ export default function HomeScreen() {
     return dateB - dateA;
   })
   .slice(0, 10); // Take top 10 newest items across all categories
+
+  const handleViewPdf = (fileUrl?: string, title?: string) => {
+    if (!fileUrl) {
+      alert("No file available for this publication");
+      return;
+    }
+
+    const absoluteUrl = fileUrl.startsWith('http') 
+      ? fileUrl 
+      : `http://localhost:5000${fileUrl}`;
+
+    router.push({
+      pathname: '/pdf-viewer',
+      params: { 
+        url: absoluteUrl,
+        title: title || 'Viewing Publication'
+      }
+    });
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-[#F8F9FB]" edges={['top']}>
@@ -91,6 +112,7 @@ export default function HomeScreen() {
                   title={book.title} 
                   author={book.author} 
                   imageUri={(book as any).imageUri}
+                  onPress={() => handleViewPdf(book.fileUrl, book.title)}
                 />
               ))
             ) : (
@@ -129,7 +151,12 @@ export default function HomeScreen() {
               }
             }
 
-            return <FeaturedCard book={featuredBook} />;
+            return (
+              <FeaturedCard 
+                book={featuredBook} 
+                onPress={() => handleViewPdf(featuredBook?.fileUrl, featuredBook?.title)}
+              />
+            );
           })()}
         </View>
 
@@ -137,4 +164,3 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-

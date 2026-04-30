@@ -59,6 +59,7 @@ export default function BooksOfPentecostScreen() {
                   categoryColor="#C5A059"
                   languages={book.languages}
                   imageUri={book.imageUri}
+                  fileUrl={book.fileUrl}
                />
              ))
            ) : (

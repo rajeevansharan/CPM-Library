@@ -10,72 +10,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { 
   VoiceHeader, 
   IssueCard, 
   ArchiveRow 
 } from '@/components/VoiceComponents';
-
-const ISSUES_DATA = [
-  { 
-    id: '1', 
-    title: "October 2023", 
-    month: "October",
-    year: "2023",
-    subtitle: "The Power of Stillness", 
-    category: "Topic",
-    imageUri: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop",
-    isNew: true
-  },
-  { 
-    id: '2', 
-    title: "September 2023", 
-    month: "September",
-    year: "2023",
-    subtitle: "Walk by Faith", 
-    category: "Topic",
-    imageUri: "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400&auto=format&fit=crop"
-  },
-  { 
-    id: '3', 
-    title: "August 2023", 
-    month: "August",
-    year: "2023",
-    subtitle: "A New Covenant", 
-    category: "Topic",
-    imageUri: "https://images.unsplash.com/photo-1532012197367-e43d0f467e9f?q=80&w=400&auto=format&fit=crop"
-  },
-  { 
-    id: '4', 
-    title: "July 2023", 
-    month: "July",
-    year: "2023",
-    subtitle: "Praise and Worship", 
-    category: "Topic",
-    imageUri: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=400&auto=format&fit=crop"
-  },
-  { 
-    id: '5', 
-    title: "October 2022", 
-    month: "October",
-    year: "2022",
-    subtitle: "The Apostolic Tradition", 
-    category: "Topic",
-    imageUri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop"
-  },
-  { 
-    id: '6', 
-    title: "September 2022", 
-    month: "September",
-    year: "2022",
-    subtitle: "Virtuous Womanhood", 
-    category: "Topic",
-    imageUri: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=400&auto=format&fit=crop"
-  }
-];
+import { useBooks } from '@/context/BooksContext';
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const YEARS = ["2023", "2022", "2021", "2020"];
+const YEARS = ["2024", "2023", "2022", "2021", "2020"];
 
 /**
  * Custom Selection Picker Modal
@@ -129,9 +73,8 @@ const SelectionPicker = ({
   </Modal>
 );
 
-import { useBooks } from '@/context/BooksContext';
-
 export default function VoiceOfPentecostScreen() {
+  const router = useRouter();
   const { voiceBooks } = useBooks();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -151,6 +94,25 @@ export default function VoiceOfPentecostScreen() {
     
     return matchesSearch && matchesMonth && matchesYear;
   });
+
+  const handleViewPdf = (fileUrl?: string, title?: string) => {
+    if (!fileUrl) {
+      alert('No file available for this issue');
+      return;
+    }
+    
+    const absoluteUrl = fileUrl.startsWith('http') 
+      ? fileUrl 
+      : `http://localhost:5000${fileUrl}`;
+
+    router.push({
+      pathname: '/pdf-viewer',
+      params: { 
+        url: absoluteUrl,
+        title: title || 'Voice of Pentecost Issue'
+      }
+    });
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -182,8 +144,6 @@ export default function VoiceOfPentecostScreen() {
            </View>
         </View>
 
-
-
         {/* Dropdown Selectors */}
         <View className="flex-row items-center px-6 mb-6 justify-between">
            <View className="flex-row">
@@ -210,11 +170,12 @@ export default function VoiceOfPentecostScreen() {
            {filteredIssues.length > 0 ? (
              filteredIssues.map(issue => (
                <IssueCard 
-                 key={issue.id}
-                 title={issue.title} 
-                 subtitle={issue.subtitle} 
-                 imageUri={issue.imageUri}
-                 isNew={issue.isNew}
+                  key={issue.id}
+                  title={issue.title} 
+                  subtitle={issue.subtitle} 
+                  imageUri={issue.imageUri}
+                  isNew={issue.isNew}
+                  onPress={() => handleViewPdf(issue.fileUrl, issue.title)}
                />
              ))
            ) : (

@@ -57,6 +57,7 @@ export default function RootLayout() {
             <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
             <Stack.Screen name="admin/index" options={{ headerShown: false }} />
             <Stack.Screen name="admin/upload" options={{ headerShown: false }} />
+            <Stack.Screen name="pdf-viewer" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
