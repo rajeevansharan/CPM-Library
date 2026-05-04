@@ -6,7 +6,13 @@ import { useRouter } from 'expo-router';
 /**
  * Publication Detail Header
  */
-export const PublicationHeader = () => {
+export const PublicationHeader = ({ 
+  isSaved, 
+  onSavePress 
+}: { 
+  isSaved?: boolean, 
+  onSavePress?: () => void 
+}) => {
   const router = useRouter();
   return (
     <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
@@ -18,8 +24,12 @@ export const PublicationHeader = () => {
         <MaterialCommunityIcons name="chevron-left" size={28} color="#203A81" />
       </TouchableOpacity>
       <Text className="text-[#203A81] text-lg font-black tracking-tight text-center">Publication Detail</Text>
-      <TouchableOpacity className="p-2 -mr-2">
-        <MaterialCommunityIcons name="bookmark-outline" size={24} color="#203A81" />
+      <TouchableOpacity onPress={onSavePress} className="p-2 -mr-2">
+        <MaterialCommunityIcons 
+          name={isSaved ? "bookmark" : "bookmark-outline"} 
+          size={24} 
+          color="#203A81" 
+        />
       </TouchableOpacity>
     </View>
   );

@@ -1,126 +1,137 @@
-/**
- * Seed script — migrates existing data/books.json into PostgreSQL
- * and sets up mock admin/user accounts.
- * 
- * Run with: npm run db:seed
- */
-
 const { PrismaClient } = require('@prisma/client');
-const fs = require('fs');
-const path = require('path');
-
+const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  // ─── Seed Users ───────────────────────────────────────────────────────────
-  console.log('Seeding users...');
-  
+  console.log('Cleaning up database...');
+  await prisma.savedBook.deleteMany();
+  await prisma.scriptureBook.deleteMany();
+  await prisma.voiceBook.deleteMany();
+  await prisma.pentecostBook.deleteMany();
+  await prisma.user.deleteMany();
+
+  console.log('Seeding data...');
+
+  // 0. Mock Users
+  const hashedUserPassword = await bcrypt.hash('test', 12);
+  const hashedAdminPassword = await bcrypt.hash('test', 12);
+
   const users = [
     {
-      email: 'admin@cpm.com',
-      password: 'admin123', // In production, use hashed passwords
-      role: 'ADMIN',
-      name: 'CPM Admin',
-      memberId: 'CPM-0001-AD'
+      id: 'user_1',
+      email: 'user',
+      password: hashedUserPassword,
+      name: 'John Doe',
+      role: 'USER',
+      memberId: 'MEM001'
     },
     {
-      email: 'user@cpm.com',
-      password: 'user123',
-      role: 'USER',
-      name: 'Daniel Wickramasinghe',
-      memberId: 'CPM-7782-SL'
+      id: 'admin_1',
+      email: 'admin',
+      password: hashedAdminPassword,
+      name: 'Admin User',
+      role: 'ADMIN',
+      memberId: 'ADM001'
     }
   ];
 
-  for (const u of users) {
-    await prisma.user.upsert({
-      where: { email: u.email },
-      update: {},
-      create: u
-    });
-  }
-  console.log('  ✓ Users seeded (admin@cpm.com / user@cpm.com)');
-
-  // ─── Seed Books from books.json ───────────────────────────────────────────
-  const BOOKS_FILE = path.join(__dirname, '..', 'data', 'books.json');
-
-  if (!fs.existsSync(BOOKS_FILE)) {
-    console.log('No books.json found — skipping book seed.');
-    return;
+  for (const user of users) {
+    await prisma.user.create({ data: user });
   }
 
-  const raw = fs.readFileSync(BOOKS_FILE, 'utf-8');
-  const data = JSON.parse(raw);
+  // 1. Scripture School Books
+  const scriptureBooks = [
+    {
+      title: 'Grade 8: Understanding Faith',
+      grade: 'Grade 8',
+      description: 'Foundational principles of the Christian faith for young believers.',
+      category: 'Grade',
+      type: 'scripture',
+      imageUri: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=300',
+    },
+    {
+      title: 'Grade 12: Foundations of Truth',
+      grade: 'Grade 12',
+      description: 'Advanced theological concepts and apologetics for seniors.',
+      category: 'Grade',
+      type: 'scripture',
+      imageUri: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=300',
+    },
+    {
+      title: 'Grade 2: The Loving Shepherd',
+      grade: 'Grade 2',
+      description: 'Simple stories of Jesus and His love for children.',
+      category: 'Grade',
+      type: 'scripture',
+      imageUri: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=300',
+    }
+  ];
 
-  console.log('Seeding books from JSON...');
-  
-  // ── Seed Scripture Books ───────────────────────────────────────────────
-  for (const book of (data.scriptureBooks || [])) {
-    await prisma.scriptureBook.upsert({
-      where: { id: book.id },
-      update: {},
-      create: {
-        id: book.id,
-        title: book.title || '',
-        grade: book.grade || '',
-        description: book.description || null,
-        imageUri: book.imageUri || null,
-        fileUrl: book.fileUrl || null,
-        category: book.category || 'Grade',
-        type: book.type || 'scripture',
-      },
-    });
+  for (const book of scriptureBooks) {
+    await prisma.scriptureBook.create({ data: book });
   }
-  console.log(`  ✓ ${(data.scriptureBooks || []).length} Scripture books seeded`);
 
-  // ── Seed Voice Books ───────────────────────────────────────────────────
-  for (const book of (data.voiceBooks || [])) {
-    await prisma.voiceBook.upsert({
-      where: { id: book.id },
-      update: {},
-      create: {
-        id: book.id,
-        title: book.title || '',
-        month: book.month || '',
-        year: book.year || '',
-        subtitle: book.subtitle || null,
-        description: book.description || null,
-        imageUri: book.imageUri || null,
-        fileUrl: book.fileUrl || null,
-        category: book.category || 'Topic',
-        type: book.type || 'voice',
-        isNew: book.isNew || false,
-      },
-    });
+  // 2. Voice of Pentecost
+  const voiceBooks = [
+    {
+      title: 'April 2024 Issue',
+      month: 'April',
+      year: '2024',
+      subtitle: 'Living in the Light',
+      description: 'Monthly insights and testimonies from the CPM family.',
+      category: 'Topic',
+      type: 'voice',
+      isNew: true,
+      imageUri: 'https://images.unsplash.com/photo-1504270997636-07ddfbd48945?q=80&w=300',
+    },
+    {
+      title: 'March 2024 Issue',
+      month: 'March',
+      year: '2024',
+      subtitle: 'Strength in Weakness',
+      description: 'A study on 2 Corinthians and modern faith.',
+      category: 'Topic',
+      type: 'voice',
+      imageUri: 'https://images.unsplash.com/photo-1476275466078-4007374efbbe?q=80&w=300',
+    }
+  ];
+
+  for (const book of voiceBooks) {
+    await prisma.voiceBook.create({ data: book });
   }
-  console.log(`  ✓ ${(data.voiceBooks || []).length} Voice books seeded`);
 
-  // ── Seed Pentecost Books ───────────────────────────────────────────────
-  for (const book of (data.pentecostBooks || [])) {
-    await prisma.pentecostBook.upsert({
-      where: { id: book.id },
-      update: {},
-      create: {
-        id: book.id,
-        title: book.title || '',
-        author: book.author || null,
-        description: book.description || null,
-        category: book.category || 'General',
-        languages: book.languages || [],
-        imageUri: book.imageUri || null,
-        fileUrl: book.fileUrl || null,
-        type: book.type || 'pentecost',
-      },
-    });
+  // 3. Pentecost Books
+  const pentecostBooks = [
+    {
+      title: 'Spiritual Warfare',
+      author: 'Pastor John Doe',
+      description: 'A comprehensive guide to understanding spiritual battles.',
+      category: 'Theology',
+      type: 'pentecost',
+      languages: ['English', 'Tamil'],
+      imageUri: 'https://images.unsplash.com/photo-1532012197367-e43d0f467e9f?q=80&w=300',
+    },
+    {
+      title: 'The History of CPM',
+      author: 'Dr. Jane Smith',
+      description: 'Exploring the roots and growth of the Ceylon Pentecostal Mission.',
+      category: 'History',
+      type: 'pentecost',
+      languages: ['English'],
+      imageUri: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=300',
+    }
+  ];
+
+  for (const book of pentecostBooks) {
+    await prisma.pentecostBook.create({ data: book });
   }
-  console.log(`  ✓ ${(data.pentecostBooks || []).length} Pentecost books seeded`);
 
-  console.log('\nAll seeding completed successfully!');
+  console.log('Seed completed successfully!');
 }
 
 main()
   .catch((e) => {
-    console.error('Seed failed:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

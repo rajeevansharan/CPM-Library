@@ -21,10 +21,11 @@ import { useAuth } from '@/context/AuthContext';
 
 const LoginScreen = () => {
   const router = useRouter();
-  const { setUser } = useAuth();
+  const { setSession } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
@@ -44,17 +45,51 @@ const LoginScreen = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setUser(data);
-        if (data.role === 'ADMIN') {
-          router.replace('/admin'); // Navigate to Admin Portal
+        await setSession(data.user, data.token);
+        if (data.user.role === 'ADMIN') {
+          router.replace('/admin');
         } else {
-          router.replace('/(tabs)'); // Navigate to User Portal
+          router.replace('/(tabs)');
         }
       } else {
         alert(data.message || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
+      alert('Could not connect to the server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!name || !email || !password) {
+      alert('Please fill in all fields');
+      return;
+    }
+    if (password.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        await setSession(data.user, data.token);
+        router.replace('/(tabs)');
+      } else {
+        alert(data.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Register error:', error);
       alert('Could not connect to the server');
     } finally {
       setLoading(false);
@@ -98,49 +133,70 @@ const LoginScreen = () => {
             <TabToggle activeTab={activeTab} onTabChange={setActiveTab} />
 
             {/* Form Fields */}
+            {activeTab === 'register' && (
+              <InputField 
+                label="Full Name" 
+                placeholder="e.g. John Doe" 
+                icon="account-outline" 
+                value={name}
+                onChangeText={setName}
+              />
+            )}
+
             <InputField 
               label="Email Address" 
-              placeholder="e.g. admin@cpm.com" 
-              icon="account-outline" 
+              placeholder="e.g. user@cpm.com" 
+              icon="email-outline" 
               value={email}
               onChangeText={setEmail}
             />
             
             <InputField 
               label="Password" 
-              placeholder="********" 
+              placeholder="••••••••" 
               icon="lock-outline" 
               isPassword={true} 
               value={password}
               onChangeText={setPassword}
             />
 
-            {/* Forgot Password */}
-            <TouchableOpacity className="items-end mb-6">
-              <Text className="text-[#C5A059] text-xs font-bold">Forgot Password?</Text>
-            </TouchableOpacity>
+            {/* Forgot Password (only on login) */}
+            {activeTab === 'login' && (
+              <TouchableOpacity className="items-end mb-6">
+                <Text className="text-[#C5A059] text-xs font-bold">Forgot Password?</Text>
+              </TouchableOpacity>
+            )}
 
-            <InputField 
-              label="Church Member ID" 
-              placeholder="CPM-XXXXX" 
-              icon="card-account-details-outline" 
-              optional={true} 
-            />
+            {activeTab === 'login' && (
+              <InputField 
+                label="Church Member ID" 
+                placeholder="CPM-XXXXX" 
+                icon="card-account-details-outline" 
+                optional={true} 
+              />
+            )}
 
             {/* Primary Action Button */}
             <View className="mt-2">
-              <PrimaryButton title={loading ? "Signing In..." : "Sign In"} icon="login-variant" onPress={handleSignIn} />
+              <PrimaryButton 
+                title={loading ? (activeTab === 'login' ? 'Signing In...' : 'Creating Account...') : (activeTab === 'login' ? 'Sign In' : 'Create Account')} 
+                icon={activeTab === 'login' ? 'login-variant' : 'account-plus-outline'} 
+                onPress={activeTab === 'login' ? handleSignIn : handleRegister} 
+              />
             </View>
 
-            {/* Or Divider */}
-            <View className="flex-row items-center my-6">
-              <View className="flex-1 h-[1px] bg-gray-100" />
-              <Text className="mx-4 text-gray-300 text-[10px] font-bold">OR</Text>
-              <View className="flex-1 h-[1px] bg-gray-100" />
-            </View>
-
-            {/* OTP Button */}
-            <SecondaryButton title="Login with OTP" />
+            {activeTab === 'login' && (
+              <>
+                {/* Or Divider */}
+                <View className="flex-row items-center my-6">
+                  <View className="flex-1 h-[1px] bg-gray-100" />
+                  <Text className="mx-4 text-gray-300 text-[10px] font-bold">OR</Text>
+                  <View className="flex-1 h-[1px] bg-gray-100" />
+                </View>
+                {/* OTP Button */}
+                <SecondaryButton title="Login with OTP" />
+              </>
+            )}
           </View>
 
           {/* Guest Mode Section */}

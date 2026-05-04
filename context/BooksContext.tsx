@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -43,11 +44,14 @@ interface BooksContextType {
   scriptureBooks: ScriptureMaterial[];
   voiceBooks: VoiceIssue[];
   pentecostBooks: PentecostBook[];
+  savedBooks: any[];
   addScriptureBook: (book: Partial<ScriptureMaterial>, file?: any, coverImage?: any) => Promise<void>;
   addVoiceBook: (issue: Partial<VoiceIssue>, file?: any, coverImage?: any) => Promise<void>;
   addPentecostBook: (book: Partial<PentecostBook>, file?: any, coverImage?: any) => Promise<void>;
   deleteBook: (type: 'scripture' | 'voice' | 'pentecost', id: string) => Promise<void>;
   refreshBooks: () => Promise<void>;
+  toggleSaveBook: (userId: string, bookId: string, bookType: string) => Promise<void>;
+  fetchSavedBooks: (userId: string) => Promise<void>;
 }
 
 const BooksContext = createContext<BooksContextType | undefined>(undefined);
@@ -56,6 +60,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
   const [scriptureBooks, setScriptureBooks] = useState<ScriptureMaterial[]>([]);
   const [voiceBooks, setVoiceBooks] = useState<VoiceIssue[]>([]);
   const [pentecostBooks, setPentecostBooks] = useState<PentecostBook[]>([]);
+  const [savedBooks, setSavedBooks] = useState<any[]>([]);
 
   const refreshBooks = async () => {
     try {
@@ -69,9 +74,48 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const fetchSavedBooks = async (userId: string) => {
+    if (!userId) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/books/saved/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSavedBooks(data);
+      }
+    } catch (error) {
+      console.error("Error fetching saved books:", error);
+    }
+  };
+
+  const toggleSaveBook = async (userId: string, bookId: string, bookType: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/books/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, bookId, bookType }),
+      });
+
+      if (response.ok) {
+        await fetchSavedBooks(userId);
+      }
+    } catch (error) {
+      console.error("Error toggling save:", error);
+    }
+  };
+
+  const { user } = useAuth();
+
   useEffect(() => {
     refreshBooks();
   }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchSavedBooks(user.id);
+    } else {
+      setSavedBooks([]);
+    }
+  }, [user?.id]);
 
   const addScriptureBook = async (book: Partial<ScriptureMaterial>, file?: any, coverImage?: any) => {
     try {
@@ -168,7 +212,19 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <BooksContext.Provider value={{ scriptureBooks, voiceBooks, pentecostBooks, addScriptureBook, addVoiceBook, addPentecostBook, deleteBook, refreshBooks }}>
+    <BooksContext.Provider value={{ 
+      scriptureBooks, 
+      voiceBooks, 
+      pentecostBooks, 
+      savedBooks,
+      addScriptureBook, 
+      addVoiceBook, 
+      addPentecostBook, 
+      deleteBook, 
+      refreshBooks,
+      toggleSaveBook,
+      fetchSavedBooks
+    }}>
       {children}
     </BooksContext.Provider>
   );

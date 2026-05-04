@@ -11,7 +11,9 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   setUser: (user: User | null) => void;
+  setSession: (user: User, token: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
 }
@@ -19,46 +21,66 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load user from storage on mount
-    const loadUser = async () => {
+    const loadSession = async () => {
       try {
         const storedUser = await AsyncStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+        const storedToken = await AsyncStorage.getItem('token');
+        if (storedUser && storedToken) {
+          setUserState(JSON.parse(storedUser));
+          setToken(storedToken);
         }
       } catch (error) {
-        console.error('Failed to load user:', error);
+        console.error('Failed to load session:', error);
       } finally {
         setLoading(false);
       }
     };
-
-    loadUser();
+    loadSession();
   }, []);
 
-  const saveUser = async (newUser: User | null) => {
-    setUser(newUser);
+  const setSession = async (newUser: User, newToken: string) => {
+    setUserState(newUser);
+    setToken(newToken);
+    try {
+      await AsyncStorage.setItem('user', JSON.stringify(newUser));
+      await AsyncStorage.setItem('token', newToken);
+    } catch (error) {
+      console.error('Failed to save session:', error);
+    }
+  };
+
+  const setUser = async (newUser: User | null) => {
+    setUserState(newUser);
     try {
       if (newUser) {
         await AsyncStorage.setItem('user', JSON.stringify(newUser));
       } else {
         await AsyncStorage.removeItem('user');
+        await AsyncStorage.removeItem('token');
+        setToken(null);
       }
     } catch (error) {
-      console.error('Failed to save user:', error);
+      console.error('Failed to update user:', error);
     }
   };
 
   const logout = async () => {
-    await saveUser(null);
+    setUserState(null);
+    setToken(null);
+    try {
+      await AsyncStorage.multiRemove(['user', 'token']);
+    } catch (error) {
+      console.error('Failed to clear session:', error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser: saveUser, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, setUser, setSession, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

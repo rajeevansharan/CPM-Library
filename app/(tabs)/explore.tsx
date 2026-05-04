@@ -16,10 +16,12 @@ import {
   MaterialCard 
 } from '@/components/ScriptureSchoolComponents';
 import { useBooks } from '@/context/BooksContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LibraryScreen() {
   const router = useRouter();
-  const { scriptureBooks, voiceBooks, pentecostBooks, refreshBooks } = useBooks();
+  const { user } = useAuth();
+  const { scriptureBooks, voiceBooks, pentecostBooks, refreshBooks, savedBooks, toggleSaveBook } = useBooks();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -59,6 +61,18 @@ export default function LibraryScreen() {
         pathname: '/pdf-viewer',
         params: { url: fileUrl, title }
       });
+    }
+  };
+
+  const isBookSaved = (bookId: string) => {
+    return savedBooks.some((b: any) => b.id === bookId);
+  };
+
+  const handleSaveToggle = (bookId: string, bookType: string) => {
+    if (user?.id) {
+      toggleSaveBook(user.id, bookId, bookType);
+    } else {
+      alert('Please log in to save books');
     }
   };
 
@@ -174,6 +188,8 @@ export default function LibraryScreen() {
               subtitle={book.type === 'voice' ? `${book.month} ${book.year}` : book.subtitle}
               description={book.description}
               imageUri={book.imageUri}
+              isSaved={isBookSaved(book.id)}
+              onSavePress={() => handleSaveToggle(book.id, book.type)}
               onViewPress={() => handleViewPdf(book.fileUrl, book.title)}
               onDownloadPress={() => {/* Add download logic if needed */}}
             />
