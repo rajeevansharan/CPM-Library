@@ -9,6 +9,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useBooks } from '@/context/BooksContext';
+import { useAuth } from '@/context/AuthContext';
 import { 
   PublicationHeader, 
   StatItem, 
@@ -18,7 +20,19 @@ import {
 
 export default function PublicationDetailScreen() {
   const router = useRouter();
-  const { title, fileUrl, description, author, imageUri, category } = useLocalSearchParams();
+  const { user } = useAuth();
+  const { savedBooks, toggleSaveBook } = useBooks();
+  const { id, title, fileUrl, description, author, imageUri, category, type } = useLocalSearchParams();
+
+  const isSaved = savedBooks.some((b: any) => b.id === id);
+
+  const handleSaveToggle = () => {
+    if (user?.id && id && type) {
+      toggleSaveBook(user.id, id as string, type as string);
+    } else if (!user) {
+      alert('Please log in to save books');
+    }
+  };
 
   const handleReadOnline = () => {
     if (!fileUrl) {
@@ -38,7 +52,7 @@ export default function PublicationDetailScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       {/* Header */}
-      <PublicationHeader />
+      <PublicationHeader isSaved={isSaved} onSavePress={handleSaveToggle} />
 
       <ScrollView 
         className="flex-1"
