@@ -215,4 +215,82 @@ router.delete('/:type/:id', async (req, res) => {
   }
 });
 
+// ─── Toggle SAVE Book ─────────────────────────────────────────────────────────
+router.post('/save', async (req, res) => {
+  try {
+    const { userId, bookId, bookType } = req.body;
+
+    if (!userId || !bookId || !bookType) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Check if already saved
+    const existing = await prisma.savedBook.findUnique({
+      where: {
+        userId_bookId_bookType: {
+          userId,
+          bookId,
+          bookType
+        }
+      }
+    });
+
+    if (existing) {
+      // Unsave
+      await prisma.savedBook.delete({
+        where: { id: existing.id }
+      });
+      return res.status(200).json({ saved: false, message: 'Book unsaved successfully' });
+    } else {
+      // Save
+      await prisma.savedBook.create({
+        data: {
+          userId,
+          bookId,
+          bookType
+        }
+      });
+      return res.status(201).json({ saved: true, message: 'Book saved successfully' });
+    }
+  } catch (error) {
+    console.error('Error toggling save:', error);
+    res.status(500).json({ message: 'Failed to toggle save', error: error.message });
+  }
+});
+
+// ─── GET Saved Books for User ──────────────────────────────────────────────────
+router.get('/saved/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const savedRecords = await prisma.savedBook.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Fetch full book details for each saved record
+    const detailedBooks = await Promise.all(
+      savedRecords.map(async (record) => {
+        let bookDetails = null;
+        if (record.bookType === 'scripture') {
+          bookDetails = await prisma.scriptureBook.findUnique({ where: { id: record.bookId } });
+        } else if (record.bookType === 'voice') {
+          bookDetails = await prisma.voiceBook.findUnique({ where: { id: record.bookId } });
+        } else if (record.bookType === 'pentecost') {
+          bookDetails = await prisma.pentecostBook.findUnique({ where: { id: record.bookId } });
+        }
+        
+        if (!bookDetails) return null;
+        return { ...bookDetails, savedId: record.id, displayType: record.bookType };
+      })
+    );
+
+    // Filter out any nulls (if a book was deleted but still in saved_books)
+    res.json(detailedBooks.filter(b => b !== null));
+  } catch (error) {
+    console.error('Error fetching saved books:', error);
+    res.status(500).json({ message: 'Failed to fetch saved books', error: error.message });
+  }
+});
+
 module.exports = router;

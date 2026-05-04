@@ -64,14 +64,29 @@ model PentecostBook {
 
 // ─── Users ──────────────────────────────────────────────────────────────────
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      String   @default("USER") // "USER" or "ADMIN"
-  name      String?
-  memberId  String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String      @id @default(cuid())
+  email      String      @unique
+  password   String
+  role       String      @default("USER") // "USER" or "ADMIN"
+  name       String?
+  memberId   String?     @unique
+  savedBooks SavedBook[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@map("users")
+}
+
+// ─── Saved Books ─────────────────────────────────────────────────────────────
+model SavedBook {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  bookType  String // "scripture", "voice", or "pentecost"
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId, bookType])
+  @@map("saved_books")
 }
