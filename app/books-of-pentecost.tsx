@@ -13,9 +13,23 @@ import {
   BookDetailCard 
 } from '@/components/BookComponents';
 import { useBooks } from '@/context/BooksContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function BooksOfPentecostScreen() {
-  const { pentecostBooks } = useBooks();
+  const { user } = useAuth();
+  const { pentecostBooks, savedBooks, toggleSaveBook } = useBooks();
+
+  const isBookSaved = (bookId: string) => {
+    return savedBooks.some((b: any) => b.id === bookId);
+  };
+
+  const handleSaveToggle = (bookId: string) => {
+    if (user?.id) {
+      toggleSaveBook(user.id, bookId, 'pentecost');
+    } else {
+      alert('Please log in to save books');
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -60,6 +74,8 @@ export default function BooksOfPentecostScreen() {
                   languages={book.languages}
                   imageUri={book.imageUri}
                   fileUrl={book.fileUrl}
+                  isSaved={isBookSaved(book.id)}
+                  onSavePress={() => handleSaveToggle(book.id)}
                />
              ))
            ) : (

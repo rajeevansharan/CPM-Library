@@ -77,7 +77,9 @@ export const BookDetailCard = ({
   languages,
   coverColor = '#1B7A63',
   imageUri,
-  fileUrl
+  fileUrl,
+  isSaved,
+  onSavePress
 }: { 
   title: string, 
   author: string, 
@@ -87,7 +89,9 @@ export const BookDetailCard = ({
   languages: string[],
   coverColor?: string,
   imageUri?: string,
-  fileUrl?: string
+  fileUrl?: string,
+  isSaved?: boolean,
+  onSavePress?: () => void
 }) => {
   const router = useRouter();
   return (
@@ -114,7 +118,16 @@ export const BookDetailCard = ({
       {/* Content Side */}
       <View className="flex-1 p-4 justify-between">
         <View>
-          <Text className="text-[#203A81] text-lg font-bold leading-6" numberOfLines={1}>{title}</Text>
+          <View className="flex-row justify-between items-start">
+            <Text className="text-[#203A81] text-lg font-bold leading-6 flex-1 mr-2" numberOfLines={1}>{title}</Text>
+            <TouchableOpacity onPress={onSavePress} className="p-1 -mt-1">
+              <MaterialCommunityIcons 
+                name={isSaved ? "bookmark" : "bookmark-outline"} 
+                size={22} 
+                color="#203A81" 
+              />
+            </TouchableOpacity>
+          </View>
           <Text className="text-gray-400 text-[10px] font-medium mb-2">{author}</Text>
           <Text className="text-gray-400 text-[10px] leading-4" numberOfLines={3}>{description}</Text>
         </View>

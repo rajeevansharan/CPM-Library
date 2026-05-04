@@ -38,22 +38,36 @@ export const IssueCard = ({
   subtitle, 
   imageUri, 
   isNew = false,
+  isSaved,
+  onSavePress,
   onPress
 }: { 
   title: string, 
   subtitle: string, 
   imageUri: string, 
   isNew?: boolean,
+  isSaved?: boolean,
+  onSavePress?: () => void,
   onPress?: () => void
 }) => {
   return (
     <TouchableOpacity className="w-[48%] mb-6" onPress={onPress}>
       <View className="relative">
         <Image 
-          source={{ uri: imageUri }} 
+          source={{ uri: imageUri || 'https://images.unsplash.com/photo-1504270997636-07ddfbd48945?q=80&w=300' }} 
           className="w-full aspect-[3/4] rounded-2xl bg-gray-200"
           resizeMode="cover"
         />
+        <TouchableOpacity 
+          onPress={onSavePress} 
+          className="absolute top-2 right-2 bg-white/80 p-2 rounded-full shadow-sm"
+        >
+          <MaterialCommunityIcons 
+            name={isSaved ? "bookmark" : "bookmark-outline"} 
+            size={18} 
+            color="#203A81" 
+          />
+        </TouchableOpacity>
       </View>
       <View className="mt-3">
         <Text className="text-[#203A81] font-bold text-sm">{title}</Text>

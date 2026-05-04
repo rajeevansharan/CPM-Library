@@ -17,6 +17,8 @@ import {
   MaterialCard 
 } from '@/components/ScriptureSchoolComponents';
 import { ExportSettingsModal } from '@/components/ExportSettingsModal';
+import { useBooks } from '@/context/BooksContext';
+import { useAuth } from '@/context/AuthContext';
 
 const MATERIALS = [
   {
@@ -127,12 +129,11 @@ const SelectionPicker = ({
   </Modal>
 );
 
-import { useBooks } from '@/context/BooksContext';
-import { Linking } from 'react-native';
 
 export default function ScriptureSchoolScreen() {
   const router = useRouter();
-  const { scriptureBooks } = useBooks();
+  const { user } = useAuth();
+  const { scriptureBooks, savedBooks, toggleSaveBook } = useBooks();
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
   const [isGradePickerVisible, setIsGradePickerVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -146,6 +147,18 @@ export default function ScriptureSchoolScreen() {
     
     return matchesSearch && item.grade === selectedGrade;
   });
+
+  const isBookSaved = (bookId: string) => {
+    return savedBooks.some((b: any) => b.id === bookId);
+  };
+
+  const handleSaveToggle = (bookId: string) => {
+    if (user?.id) {
+      toggleSaveBook(user.id, bookId, 'scripture');
+    } else {
+      alert('Please log in to save books');
+    }
+  };
 
   const handleViewPdf = (fileUrl?: string) => {
     if (!fileUrl) {
@@ -241,6 +254,8 @@ export default function ScriptureSchoolScreen() {
               level="" 
               year="" 
               imageUri={item.imageUri}
+              isSaved={isBookSaved(item.id)}
+              onSavePress={() => handleSaveToggle(item.id)}
               onDownloadPress={() => setIsExportModalVisible(true)}
               onViewPress={() => handleViewPdf(item.fileUrl)}
             />

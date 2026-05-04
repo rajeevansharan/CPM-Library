@@ -17,6 +17,7 @@ import {
   ArchiveRow 
 } from '@/components/VoiceComponents';
 import { useBooks } from '@/context/BooksContext';
+import { useAuth } from '@/context/AuthContext';
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const YEARS = ["2024", "2023", "2022", "2021", "2020"];
@@ -73,9 +74,11 @@ const SelectionPicker = ({
   </Modal>
 );
 
+
 export default function VoiceOfPentecostScreen() {
   const router = useRouter();
-  const { voiceBooks } = useBooks();
+  const { user } = useAuth();
+  const { voiceBooks, savedBooks, toggleSaveBook } = useBooks();
   const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedMonth, setSelectedMonth] = useState('October');
@@ -94,6 +97,18 @@ export default function VoiceOfPentecostScreen() {
     
     return matchesSearch && matchesMonth && matchesYear;
   });
+
+  const isBookSaved = (bookId: string) => {
+    return savedBooks.some((b: any) => b.id === bookId);
+  };
+
+  const handleSaveToggle = (bookId: string) => {
+    if (user?.id) {
+      toggleSaveBook(user.id, bookId, 'voice');
+    } else {
+      alert('Please log in to save books');
+    }
+  };
 
   const handleViewPdf = (fileUrl?: string, title?: string) => {
     if (!fileUrl) {
@@ -175,6 +190,8 @@ export default function VoiceOfPentecostScreen() {
                   subtitle={issue.subtitle} 
                   imageUri={issue.imageUri}
                   isNew={issue.isNew}
+                  isSaved={isBookSaved(issue.id)}
+                  onSavePress={() => handleSaveToggle(issue.id)}
                   onPress={() => handleViewPdf(issue.fileUrl, issue.title)}
                />
              ))

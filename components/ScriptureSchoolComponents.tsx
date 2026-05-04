@@ -72,6 +72,8 @@ export const MaterialCard = ({
   subtitle,
   author,
   description,
+  isSaved,
+  onSavePress,
   onDownloadPress,
   onViewPress
 }: { 
@@ -84,6 +86,8 @@ export const MaterialCard = ({
   subtitle?: string,
   author?: string,
   description?: string,
+  isSaved?: boolean,
+  onSavePress?: () => void,
   onDownloadPress?: () => void,
   onViewPress?: () => void
 }) => {
@@ -101,13 +105,22 @@ export const MaterialCard = ({
       {/* Info */}
       <View className="flex-1 ml-4 justify-between py-1">
         <View>
-          {(grade || author) && (
-            <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">
-              {grade || author}
-            </Text>
-          )}
           <View className="flex-row items-center justify-between mb-1">
-            <Text className="text-[#203A81] font-bold text-base flex-1 mr-2" numberOfLines={2}>{title}</Text>
+            <View className="flex-1">
+              {(grade || author) && (
+                <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">
+                  {grade || author}
+                </Text>
+              )}
+              <Text className="text-[#203A81] font-bold text-base mr-2" numberOfLines={2}>{title}</Text>
+            </View>
+            <TouchableOpacity onPress={onSavePress} className="p-2">
+              <MaterialCommunityIcons 
+                name={isSaved ? "bookmark" : "bookmark-outline"} 
+                size={22} 
+                color={isSaved ? "#203A81" : "#D1D5DB"} 
+              />
+            </TouchableOpacity>
           </View>
           {subtitle && (
             <Text className="text-gray-500 text-xs font-medium mb-1 italic" numberOfLines={1}>{subtitle}</Text>
