@@ -169,7 +169,7 @@ export default function ScriptureSchoolScreen() {
     // Ensure URL is absolute
     const absoluteUrl = fileUrl.startsWith('http') 
       ? fileUrl 
-      : `http://localhost:5000${fileUrl}`;
+      : `${process.env.EXPO_PUBLIC_BASE_URL}${fileUrl}`;
 
     // Navigate to the internal PDF viewer
     router.push({
@@ -264,7 +264,7 @@ export default function ScriptureSchoolScreen() {
           <View className="items-center justify-center py-20 px-10">
             <MaterialCommunityIcons name="book-search-outline" size={64} color="#E5E7EB" />
             <Text className="text-gray-400 font-bold text-base mt-4">No materials found</Text>
-            <Text className="text-gray-300 text-sm text-center mt-2">Try adjusting your search or filters to find what you're looking for.</Text>
+            <Text className="text-gray-300 text-sm text-center mt-2">Try adjusting your search or filters to find what you&apos;re looking for.</Text>
           </View>
         )}
 

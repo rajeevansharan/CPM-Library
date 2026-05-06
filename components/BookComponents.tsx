@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useRouter } from 'expo-router';
 
@@ -140,7 +139,7 @@ export const BookDetailCard = ({
             <TouchableOpacity 
               onPress={() => router.push({
                 pathname: '/publication-detail',
-                params: { title, fileUrl: (arguments[0] as any).fileUrl, description, author, imageUri } 
+                params: { title, fileUrl, description, author, imageUri } 
               })}
               className="bg-[#203A81] px-5 py-2.5 rounded-xl"
            >

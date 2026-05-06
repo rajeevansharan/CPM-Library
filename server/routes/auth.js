@@ -5,7 +5,7 @@ const prisma = require('../lib/prisma');
 
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'cpm-library-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
 const JWT_EXPIRES_IN = '7d';
 
 /**

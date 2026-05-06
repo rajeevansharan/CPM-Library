@@ -44,7 +44,7 @@ export const IssueCard = ({
 }: { 
   title: string, 
   subtitle: string, 
-  imageUri: string, 
+  imageUri?: string, 
   isNew?: boolean,
   isSaved?: boolean,
   onSavePress?: () => void,

@@ -118,7 +118,7 @@ export default function VoiceOfPentecostScreen() {
     
     const absoluteUrl = fileUrl.startsWith('http') 
       ? fileUrl 
-      : `http://localhost:5000${fileUrl}`;
+      : `${process.env.EXPO_PUBLIC_BASE_URL}${fileUrl}`;
 
     router.push({
       pathname: '/pdf-viewer',

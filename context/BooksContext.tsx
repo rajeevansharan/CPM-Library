@@ -1,17 +1,19 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export interface ScriptureMaterial {
   id: string;
   title: string;
   grade: string;
+  author?: string;
   description?: string;
   fileUrl?: string;
   imageUri?: string;
   category: string;
   type: 'scripture';
+  createdAt?: string;
 }
 
 export interface VoiceIssue {
@@ -20,12 +22,14 @@ export interface VoiceIssue {
   month: string;
   year: string;
   subtitle: string;
+  author?: string;
   description?: string;
   fileUrl?: string;
   imageUri?: string;
   category: string;
   type: 'voice';
   isNew?: boolean;
+  createdAt?: string;
 }
 
 export interface PentecostBook {
@@ -38,6 +42,7 @@ export interface PentecostBook {
   imageUri?: string;
   fileUrl?: string;
   type: 'pentecost';
+  createdAt?: string;
 }
 
 interface BooksContextType {
