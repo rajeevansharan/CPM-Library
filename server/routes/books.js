@@ -394,5 +394,65 @@ router.put('/:type/:id', upload.fields([
   }
 });
 
+// ─── Download Proxy ────────────────────────────────────────────────────────────
+// Fetches the PDF from Cloudinary and streams it back with proper headers
+// so the browser downloads a file with the correct .pdf extension.
+router.get('/download', async (req, res) => {
+  try {
+    const { url, title } = req.query;
+
+    if (!url) {
+      return res.status(400).json({ message: 'Missing url parameter' });
+    }
+
+    // Sanitize title for filename
+    const safeTitle = (title || 'book')
+      .toString()
+      .replace(/[^a-zA-Z0-9\s\-_]/g, '')
+      .trim()
+      .replace(/\s+/g, '_') || 'book';
+
+    const https = require('https');
+    const http = require('http');
+    const client = url.toString().startsWith('https') ? https : http;
+
+    client.get(url.toString(), (proxyRes) => {
+      // Follow redirects
+      if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
+        const redirectClient = proxyRes.headers.location.startsWith('https') ? https : http;
+        redirectClient.get(proxyRes.headers.location, (redirectRes) => {
+          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader('Content-Disposition', `attachment; filename="${safeTitle}.pdf"`);
+          if (redirectRes.headers['content-length']) {
+            res.setHeader('Content-Length', redirectRes.headers['content-length']);
+          }
+          redirectRes.pipe(res);
+        }).on('error', (err) => {
+          console.error('Redirect download error:', err);
+          res.status(500).json({ message: 'Failed to download file' });
+        });
+        return;
+      }
+
+      if (proxyRes.statusCode !== 200) {
+        return res.status(proxyRes.statusCode).json({ message: 'Failed to fetch file from storage' });
+      }
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${safeTitle}.pdf"`);
+      if (proxyRes.headers['content-length']) {
+        res.setHeader('Content-Length', proxyRes.headers['content-length']);
+      }
+      proxyRes.pipe(res);
+    }).on('error', (err) => {
+      console.error('Download proxy error:', err);
+      res.status(500).json({ message: 'Failed to download file' });
+    });
+  } catch (error) {
+    console.error('Download error:', error);
+    res.status(500).json({ message: 'Failed to download file', error: error.message });
+  }
+});
+
 module.exports = router;
 

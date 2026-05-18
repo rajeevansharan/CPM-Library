@@ -87,7 +87,19 @@ export const ActionButton = ({
 /**
  * Reflections Section
  */
-export const ReflectionBox = () => {
+export const ReflectionBox = ({
+  value,
+  onChangeText,
+  onSave,
+  isSaving = false,
+  statusText = 'No Note Saved'
+}: {
+  value: string,
+  onChangeText: (val: string) => void,
+  onSave: () => void,
+  isSaving?: boolean,
+  statusText?: string
+}) => {
   return (
     <View className="bg-gray-50/80 rounded-[32px] p-6 mb-8 border border-gray-100">
       <View className="flex-row justify-between items-center mb-4">
@@ -95,25 +107,34 @@ export const ReflectionBox = () => {
           <MaterialCommunityIcons name="notebook-edit-outline" size={20} color="#203A81" />
           <Text className="text-[#203A81] font-black text-sm ml-2">Personal Reflections</Text>
         </View>
-        <Text className="text-gray-400 text-[8px] font-black uppercase tracking-widest">Draft Saved</Text>
+        <Text className="text-gray-400 text-[8px] font-black uppercase tracking-widest">{statusText}</Text>
       </View>
       
       <TextInput 
         placeholder="Type your spiritual insights and study notes here..."
         multiline
         numberOfLines={4}
+        value={value}
+        onChangeText={onChangeText}
         className="text-gray-500 text-xs leading-5 min-h-[100px] text-left align-top"
         placeholderTextColor="#9CA3AF"
+        style={{ outlineStyle: 'none' } as any}
       />
       
       <View className="flex-row items-center justify-between mt-6 pt-4 border-t border-gray-100">
-        <View className="flex-row space-x-6">
+        {/* <View className="flex-row space-x-6">
           <TouchableOpacity className="mr-4"><MaterialCommunityIcons name="format-bold" size={20} color="#9CA3AF" /></TouchableOpacity>
           <TouchableOpacity className="mr-4"><MaterialCommunityIcons name="format-italic" size={20} color="#9CA3AF" /></TouchableOpacity>
           <TouchableOpacity><MaterialCommunityIcons name="format-list-bulleted" size={20} color="#9CA3AF" /></TouchableOpacity>
-        </View>
-        <TouchableOpacity className="bg-[#203A81]/10 px-6 py-2 rounded-xl">
-          <Text className="text-[#203A81] font-black text-[10px] uppercase tracking-wider">Save Note</Text>
+        </View> */}
+        <TouchableOpacity 
+          onPress={onSave}
+          disabled={isSaving}
+          className="bg-[#203A81]/10 px-6 py-2 rounded-xl active:bg-[#203A81]/20"
+        >
+          <Text className="text-[#203A81] font-black text-[10px] uppercase tracking-wider">
+            {isSaving ? 'Saving...' : 'Save Note'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

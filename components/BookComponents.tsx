@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
 import { useRouter } from 'expo-router';
 
 /**
@@ -155,7 +154,17 @@ export const BookDetailCard = ({
             <TouchableOpacity 
               onPress={() => router.push({
                 pathname: '/publication-detail',
-                params: { id, type, category, title, fileUrl, description, author, imageUri } 
+                params: { 
+                  id, 
+                  type, 
+                  category, 
+                  title, 
+                  fileUrl, 
+                  description, 
+                  author, 
+                  imageUri,
+                  languages: JSON.stringify(languages || [])
+                } 
               })}
               className="bg-[#203A81] px-5 py-2.5 rounded-xl"
            >

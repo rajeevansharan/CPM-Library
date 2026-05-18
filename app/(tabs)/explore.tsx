@@ -134,38 +134,6 @@ export default function LibraryScreen() {
           </ScrollView>
         </View>
 
-        {/* Featured / Recent Section (Only if All is selected) */}
-        {activeFilter === 'All' && searchQuery === '' && allBooks.length > 0 && (
-          <View className="mb-8">
-            <View className="px-6 mb-4">
-              <Text className="text-[#203A81] text-sm font-black uppercase tracking-widest">Recently Added</Text>
-            </View>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 24 }}
-            >
-              {allBooks.slice(0, 5).map((book: any) => (
-                <TouchableOpacity 
-                  key={book.id} 
-                  className="mr-4 w-32"
-                  onPress={() => handleViewPdf(book.fileUrl, book.title)}
-                >
-                  <View className="w-32 h-44 bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 mb-2">
-                    <Image 
-                      source={{ uri: book.imageUri || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=200&auto=format&fit=crop' }}
-                      className="flex-1"
-                      resizeMode="cover"
-                    />
-                  </View>
-                  <Text className="text-[#203A81] font-bold text-[10px] uppercase mb-0.5" numberOfLines={1}>{book.displayType}</Text>
-                  <Text className="text-gray-800 font-bold text-xs" numberOfLines={2}>{book.title}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
         {/* List Header Section */}
         <View className="flex-row justify-between items-center px-6 mb-4">
           <Text className="text-gray-400 text-[10px] font-black uppercase tracking-[1px]">
@@ -214,4 +182,3 @@ export default function LibraryScreen() {
     </SafeAreaView>
   );
 }
-
