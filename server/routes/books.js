@@ -30,6 +30,11 @@ const uploadToCloudinary = (buffer, options) => {
 // ─── GET all books ─────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+
     const [scriptureBooks, voiceBooks, pentecostBooks] = await Promise.all([
       prisma.scriptureBook.findMany({ orderBy: { createdAt: 'desc' } }),
       prisma.voiceBook.findMany({ orderBy: { createdAt: 'desc' } }),
@@ -261,6 +266,11 @@ router.post('/save', async (req, res) => {
 // ─── GET Saved Books for User ──────────────────────────────────────────────────
 router.get('/saved/:userId', async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+
     const { userId } = req.params;
 
     const savedRecords = await prisma.savedBook.findMany({
@@ -293,4 +303,94 @@ router.get('/saved/:userId', async (req, res) => {
   }
 });
 
+// ─── PUT Update Book ─────────────────────────────────────────────────────────────
+router.put('/:type/:id', upload.fields([
+  { name: 'coverImage', maxCount: 1 },
+  { name: 'file', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const { type, id } = req.params;
+    const files = req.files;
+
+    let coverImageUrl = undefined;
+    let fileUrl = undefined;
+
+    // 1. Upload new Cover Image to Cloudinary if supplied
+    if (files && files.coverImage) {
+      const result = await uploadToCloudinary(files.coverImage[0].buffer, {
+        folder: 'cpm_library/covers',
+        resource_type: 'image'
+      });
+      coverImageUrl = result.secure_url;
+    }
+
+    // 2. Upload new PDF File to Cloudinary if supplied
+    if (files && files.file) {
+      const result = await uploadToCloudinary(files.file[0].buffer, {
+        folder: 'cpm_library/publications',
+        resource_type: 'raw'
+      });
+      fileUrl = result.secure_url;
+    }
+
+    let updatedBook = null;
+
+    if (type === 'scripture') {
+      const { title, grade, description } = req.body;
+      const data = {
+        title,
+        grade,
+        description: description === 'undefined' ? null : description,
+      };
+      if (coverImageUrl) data.imageUri = coverImageUrl;
+      if (fileUrl) data.fileUrl = fileUrl;
+
+      updatedBook = await prisma.scriptureBook.update({
+        where: { id },
+        data
+      });
+    } else if (type === 'voice') {
+      const { title, month, year, subtitle, description } = req.body;
+      const data = {
+        title,
+        month,
+        year,
+        subtitle: subtitle === 'undefined' ? null : subtitle,
+        description: description === 'undefined' ? null : description,
+      };
+      if (coverImageUrl) data.imageUri = coverImageUrl;
+      if (fileUrl) data.fileUrl = fileUrl;
+
+      updatedBook = await prisma.voiceBook.update({
+        where: { id },
+        data
+      });
+    } else if (type === 'pentecost') {
+      const { title, author, description, category, languages } = req.body;
+      const data = {
+        title,
+        author: author === 'undefined' ? null : author,
+        description: description === 'undefined' ? null : description,
+        category: category || 'General',
+        languages: languages ? JSON.parse(languages) : [],
+      };
+      if (coverImageUrl) data.imageUri = coverImageUrl;
+      if (fileUrl) data.fileUrl = fileUrl;
+
+      updatedBook = await prisma.pentecostBook.update({
+        where: { id },
+        data
+      });
+    } else {
+      return res.status(400).json({ message: `Invalid book type: ${type}` });
+    }
+
+    res.status(200).json(updatedBook);
+  } catch (error) {
+    console.error('Error updating book:', error);
+    res.status(500).json({ message: 'Failed to update book', error: error.message });
+  }
+});
+
 module.exports = router;
+

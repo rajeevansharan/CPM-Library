@@ -1,43 +1,35 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AdminHeader } from '@/components/AdminComponents';
+import { AdminHeader, ConfirmModal } from '@/components/AdminComponents';
 import { useBooks, ScriptureMaterial } from '@/context/BooksContext';
+import { useToast } from '@/context/ToastContext';
 
-import { Platform } from 'react-native';
 
 export default function ManageBooksScreen() {
   const router = useRouter();
   const { scriptureBooks, deleteBook } = useBooks();
+  const { showToast } = useToast();
 
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
+  const [selectedBook, setSelectedBook] = React.useState<ScriptureMaterial | null>(null);
+  const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
 
-  const handleDelete = async (book: ScriptureMaterial) => {
-    const performDelete = async () => {
-      setDeletingId(book.id);
-      try {
-        await deleteBook('scripture', book.id);
-      } finally {
-        setDeletingId(null);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm(`Are you sure you want to delete "${book.title}"?`);
-      if (confirmed) performDelete();
-      return;
+  const handleConfirmDelete = async () => {
+    if (!selectedBook) return;
+    setDeletingId(selectedBook.id);
+    try {
+      await deleteBook('scripture', selectedBook.id);
+      showToast(`"${selectedBook.title}" deleted successfully!`, 'success');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      showToast('Failed to delete book', 'error');
+    } finally {
+      setDeletingId(null);
+      setSelectedBook(null);
     }
-
-    Alert.alert(
-      "Confirm Delete",
-      `Are you sure you want to delete "${book.title}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: performDelete }
-      ]
-    );
   };
 
   return (
@@ -84,8 +76,34 @@ export default function ManageBooksScreen() {
 
                   <View className="flex-row">
                     <TouchableOpacity 
+                      className="p-3 bg-blue-50 rounded-full ml-2"
+                      onPress={() => router.push({
+                        pathname: '/admin/upload',
+                        params: {
+                          id: book.id,
+                          type: 'scripture',
+                          title: book.title,
+                          grade: book.grade,
+                          description: book.description || '',
+                          imageUri: book.imageUri || '',
+                          fileUrl: book.fileUrl || ''
+                        }
+                      })}
+                    >
+                      <MaterialCommunityIcons 
+                        name="pencil-outline" 
+                        size={20} 
+                        color="#203A81" 
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
                       className={`p-3 bg-red-50 rounded-full ml-2 ${deletingId === book.id ? 'opacity-50' : ''}`}
-                      onPress={() => !deletingId && handleDelete(book)}
+                      onPress={() => {
+                        if (!deletingId) {
+                          setSelectedBook(book);
+                          setIsConfirmVisible(true);
+                        }
+                      }}
                       disabled={!!deletingId}
                     >
                       <MaterialCommunityIcons 
@@ -105,6 +123,13 @@ export default function ManageBooksScreen() {
            )}
         </View>
       </ScrollView>
+      <ConfirmModal
+        isVisible={isConfirmVisible}
+        onClose={() => setIsConfirmVisible(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Book"
+        message={`Are you sure you want to delete "${selectedBook?.title}"? This action cannot be undone.`}
+      />
     </SafeAreaView>
   );
 }

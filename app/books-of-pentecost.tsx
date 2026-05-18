@@ -14,10 +14,12 @@ import {
 } from '@/components/BookComponents';
 import { useBooks } from '@/context/BooksContext';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 
 export default function BooksOfPentecostScreen() {
   const { user } = useAuth();
   const { pentecostBooks, savedBooks, toggleSaveBook } = useBooks();
+  const { showToast } = useToast();
 
   const isBookSaved = (bookId: string) => {
     return savedBooks.some((b: any) => b.id === bookId);
@@ -27,7 +29,7 @@ export default function BooksOfPentecostScreen() {
     if (user?.id) {
       toggleSaveBook(user.id, bookId, 'pentecost');
     } else {
-      alert('Please log in to save books');
+      showToast('Please log in to save books', 'info');
     }
   };
 
@@ -66,6 +68,8 @@ export default function BooksOfPentecostScreen() {
              pentecostBooks.map((book) => (
                <BookDetailCard 
                   key={book.id}
+                  id={book.id}
+                  type="pentecost"
                   title={book.title} 
                   author={book.author} 
                   description={book.description}

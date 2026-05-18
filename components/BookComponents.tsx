@@ -68,6 +68,8 @@ export const FilterChip = ({
  * Single Book Card Component
  */
 export const BookDetailCard = ({ 
+  id,
+  type,
   title, 
   author, 
   description, 
@@ -80,6 +82,8 @@ export const BookDetailCard = ({
   isSaved,
   onSavePress
 }: { 
+  id: string,
+  type: string,
   title: string, 
   author: string, 
   description: string, 
@@ -139,7 +143,7 @@ export const BookDetailCard = ({
             <TouchableOpacity 
               onPress={() => router.push({
                 pathname: '/publication-detail',
-                params: { title, fileUrl, description, author, imageUri } 
+                params: { id, type, category, title, fileUrl, description, author, imageUri } 
               })}
               className="bg-[#203A81] px-5 py-2.5 rounded-xl"
            >

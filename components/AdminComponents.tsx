@@ -169,3 +169,70 @@ export const GRADES = [
 
 export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const YEARS = ["2024", "2023", "2022", "2021", "2020"];
+
+/**
+ * Premium Custom Confirmation Dialog Modal Overlay
+ */
+export const ConfirmModal = ({
+  isVisible,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = "Delete",
+  cancelText = "Cancel",
+  isDanger = true
+}: {
+  isVisible: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  isDanger?: boolean;
+}) => (
+  <Modal 
+    visible={isVisible} 
+    transparent 
+    animationType="fade" 
+    onRequestClose={onClose}
+  >
+    <Pressable 
+      className="flex-1 bg-black/60 justify-center items-center px-6" 
+      onPress={onClose}
+    >
+      <Pressable 
+        className="bg-white w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl p-6 border border-gray-100"
+        onPress={(e) => e.stopPropagation()}
+      >
+        <View className="items-center mt-2">
+          <View className={`p-4 rounded-full mb-4 ${isDanger ? 'bg-red-50' : 'bg-blue-50'}`}>
+            <MaterialCommunityIcons 
+              name={isDanger ? "delete-empty" : "help-circle-outline"} 
+              size={36} 
+              color={isDanger ? "#EF4444" : "#203A81"} 
+            />
+          </View>
+          <Text className="text-[#203A81] font-black text-xl text-center px-2">{title}</Text>
+          <Text className="text-gray-500 text-sm mt-3 text-center leading-relaxed px-4">{message}</Text>
+        </View>
+
+        <View className="flex-row mt-6 space-x-3 gap-3">
+          <TouchableOpacity 
+            className="flex-1 py-4 bg-gray-100 rounded-2xl items-center active:bg-gray-200" 
+            onPress={onClose}
+          >
+            <Text className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">{cancelText}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            className={`flex-1 py-4 rounded-2xl items-center active:opacity-90 shadow-sm ${isDanger ? 'bg-red-500 shadow-red-200' : 'bg-[#203A81] shadow-blue-200'}`} 
+            onPress={() => { onConfirm(); onClose(); }}
+          >
+            <Text className="text-white font-black uppercase text-[10px] tracking-widest">{confirmText}</Text>
+          </TouchableOpacity>
+        </View>
+      </Pressable>
+    </Pressable>
+  </Modal>
+);

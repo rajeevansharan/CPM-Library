@@ -130,21 +130,21 @@ export const MaterialCard = ({
           )}
         </View>
 
-        <View className="flex-row items-center mt-2">
+        <View className="flex-row items-center mt-2 justify-between">
           <TouchableOpacity 
-            className="flex-row items-center mr-6 bg-[#C5A059]/10 px-3 py-1.5 rounded-full" 
+            className="flex-row items-center bg-[#C5A059]/10 px-2 py-1.5 rounded-full flex-1 justify-center mr-2" 
             onPress={onViewPress}
           >
-            <MaterialCommunityIcons name="eye-outline" size={14} color="#C5A059" />
-            <Text className="text-[#C5A059] font-black text-[9px] ml-1 uppercase tracking-widest">View PDF</Text>
+            <MaterialCommunityIcons name="eye-outline" size={12} color="#C5A059" />
+            <Text className="text-[#C5A059] font-black text-[8px] ml-1 uppercase tracking-wider">View PDF</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            className="flex-row items-center bg-[#203A81]/5 px-3 py-1.5 rounded-full" 
+            className="flex-row items-center bg-[#203A81]/5 px-2 py-1.5 rounded-full flex-1 justify-center" 
             onPress={onDownloadPress}
           >
-            <MaterialCommunityIcons name="download" size={14} color="#203A81" />
-            <Text className="text-[#203A81] font-black text-[9px] ml-1 uppercase tracking-widest">Download</Text>
+            <MaterialCommunityIcons name="download" size={12} color="#203A81" />
+            <Text className="text-[#203A81] font-black text-[8px] ml-1 uppercase tracking-wider">Download</Text>
           </TouchableOpacity>
         </View>
       </View>

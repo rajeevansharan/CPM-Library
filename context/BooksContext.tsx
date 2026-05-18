@@ -54,6 +54,7 @@ interface BooksContextType {
   addVoiceBook: (issue: Partial<VoiceIssue>, file?: any, coverImage?: any) => Promise<void>;
   addPentecostBook: (book: Partial<PentecostBook>, file?: any, coverImage?: any) => Promise<void>;
   deleteBook: (type: 'scripture' | 'voice' | 'pentecost', id: string) => Promise<void>;
+  updateBook: (type: 'scripture' | 'voice' | 'pentecost', id: string, book: any, file?: any, coverImage?: any) => Promise<void>;
   refreshBooks: () => Promise<void>;
   toggleSaveBook: (userId: string, bookId: string, bookType: string) => Promise<void>;
   fetchSavedBooks: (userId: string) => Promise<void>;
@@ -69,7 +70,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshBooks = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/books`);
+      const response = await fetch(`${API_BASE_URL}/books?t=${Date.now()}`);
       const data = await response.json();
       setScriptureBooks(data.scriptureBooks || []);
       setVoiceBooks(data.voiceBooks || []);
@@ -82,7 +83,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
   const fetchSavedBooks = async (userId: string) => {
     if (!userId) return;
     try {
-      const response = await fetch(`${API_BASE_URL}/books/saved/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/books/saved/${userId}?t=${Date.now()}`);
       if (response.ok) {
         const data = await response.json();
         setSavedBooks(data);
@@ -216,6 +217,38 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateBook = async (type: 'scripture' | 'voice' | 'pentecost', id: string, book: any, file?: any, coverImage?: any) => {
+    try {
+      const formData = new FormData();
+      Object.keys(book).forEach(key => {
+        if (book[key] !== undefined) {
+          if (key === 'languages') {
+            formData.append(key, JSON.stringify(book[key]));
+          } else {
+            formData.append(key, book[key]);
+          }
+        }
+      });
+      if (file) formData.append('file', file);
+      if (coverImage) formData.append('coverImage', coverImage);
+
+      const response = await fetch(`${API_BASE_URL}/books/${type}/${id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (response.ok) {
+        await refreshBooks();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update book');
+      }
+    } catch (error) {
+      console.error("Error updating book:", error);
+      throw error;
+    }
+  };
+
   return (
     <BooksContext.Provider value={{ 
       scriptureBooks, 
@@ -226,6 +259,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
       addVoiceBook, 
       addPentecostBook, 
       deleteBook, 
+      updateBook,
       refreshBooks,
       toggleSaveBook,
       fetchSavedBooks

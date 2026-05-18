@@ -11,6 +11,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useBooks } from '@/context/BooksContext';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { 
   PublicationHeader, 
   StatItem, 
@@ -22,6 +23,7 @@ export default function PublicationDetailScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { savedBooks, toggleSaveBook } = useBooks();
+  const { showToast } = useToast();
   const { id, title, fileUrl, description, author, imageUri, category, type } = useLocalSearchParams();
 
   const isSaved = savedBooks.some((b: any) => b.id === id);
@@ -30,13 +32,13 @@ export default function PublicationDetailScreen() {
     if (user?.id && id && type) {
       toggleSaveBook(user.id, id as string, type as string);
     } else if (!user) {
-      alert('Please log in to save books');
+      showToast('Please log in to save books', 'info');
     }
   };
 
   const handleReadOnline = () => {
     if (!fileUrl) {
-      alert("No file available for this publication");
+      showToast('No PDF available for this publication', 'error');
       return;
     }
 

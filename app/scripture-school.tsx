@@ -19,6 +19,7 @@ import {
 import { ExportSettingsModal } from '@/components/ExportSettingsModal';
 import { useBooks } from '@/context/BooksContext';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 
 const MATERIALS = [
   {
@@ -134,6 +135,7 @@ export default function ScriptureSchoolScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { scriptureBooks, savedBooks, toggleSaveBook } = useBooks();
+  const { showToast } = useToast();
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
   const [isGradePickerVisible, setIsGradePickerVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,13 +158,13 @@ export default function ScriptureSchoolScreen() {
     if (user?.id) {
       toggleSaveBook(user.id, bookId, 'scripture');
     } else {
-      alert('Please log in to save books');
+      showToast('Please log in to save books', 'info');
     }
   };
 
   const handleViewPdf = (fileUrl?: string) => {
     if (!fileUrl) {
-      alert('No file available for this book');
+      showToast('No PDF available for this book', 'error');
       return;
     }
     

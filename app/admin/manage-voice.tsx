@@ -1,40 +1,33 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Image, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AdminHeader } from '@/components/AdminComponents';
+import { AdminHeader, ConfirmModal } from '@/components/AdminComponents';
 import { useBooks, VoiceIssue } from '@/context/BooksContext';
+import { useToast } from '@/context/ToastContext';
 
 export default function ManageVoiceScreen() {
   const router = useRouter();
   const { voiceBooks, deleteBook } = useBooks();
+  const { showToast } = useToast();
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
+  const [selectedIssue, setSelectedIssue] = React.useState<VoiceIssue | null>(null);
+  const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
 
-  const handleDelete = async (issue: VoiceIssue) => {
-    const performDelete = async () => {
-      setDeletingId(issue.id);
-      try {
-        await deleteBook('voice', issue.id);
-      } finally {
-        setDeletingId(null);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm(`Are you sure you want to delete "${issue.title}"?`);
-      if (confirmed) performDelete();
-      return;
+  const handleConfirmDelete = async () => {
+    if (!selectedIssue) return;
+    setDeletingId(selectedIssue.id);
+    try {
+      await deleteBook('voice', selectedIssue.id);
+      showToast(`"${selectedIssue.title}" deleted successfully!`, 'success');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      showToast('Failed to delete issue', 'error');
+    } finally {
+      setDeletingId(null);
+      setSelectedIssue(null);
     }
-
-    Alert.alert(
-      "Confirm Delete",
-      `Are you sure you want to delete this issue: "${issue.title}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: performDelete }
-      ]
-    );
   };
 
   return (
@@ -81,8 +74,36 @@ export default function ManageVoiceScreen() {
 
                   <View className="flex-row">
                     <TouchableOpacity 
+                      className="p-3 bg-blue-50 rounded-full ml-2"
+                      onPress={() => router.push({
+                        pathname: '/admin/upload',
+                        params: {
+                          id: issue.id,
+                          type: 'voice',
+                          title: issue.title,
+                          month: issue.month,
+                          year: issue.year,
+                          subtitle: issue.subtitle || '',
+                          description: issue.description || '',
+                          imageUri: issue.imageUri || '',
+                          fileUrl: issue.fileUrl || ''
+                        }
+                      })}
+                    >
+                      <MaterialCommunityIcons 
+                        name="pencil-outline" 
+                        size={20} 
+                        color="#203A81" 
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
                       className={`p-3 bg-red-50 rounded-full ml-2 ${deletingId === issue.id ? 'opacity-50' : ''}`}
-                      onPress={() => !deletingId && handleDelete(issue)}
+                      onPress={() => {
+                        if (!deletingId) {
+                          setSelectedIssue(issue);
+                          setIsConfirmVisible(true);
+                        }
+                      }}
                       disabled={!!deletingId}
                     >
                       <MaterialCommunityIcons 
@@ -102,6 +123,13 @@ export default function ManageVoiceScreen() {
            )}
         </View>
       </ScrollView>
+      <ConfirmModal
+        isVisible={isConfirmVisible}
+        onClose={() => setIsConfirmVisible(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Issue"
+        message={`Are you sure you want to delete this issue: "${selectedIssue?.title}"? This action cannot be undone.`}
+      />
     </SafeAreaView>
   );
 }

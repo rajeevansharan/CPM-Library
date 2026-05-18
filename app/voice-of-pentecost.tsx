@@ -18,6 +18,7 @@ import {
 } from '@/components/VoiceComponents';
 import { useBooks } from '@/context/BooksContext';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const YEARS = ["2024", "2023", "2022", "2021", "2020"];
@@ -79,6 +80,7 @@ export default function VoiceOfPentecostScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { voiceBooks, savedBooks, toggleSaveBook } = useBooks();
+  const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedMonth, setSelectedMonth] = useState('October');
@@ -106,13 +108,13 @@ export default function VoiceOfPentecostScreen() {
     if (user?.id) {
       toggleSaveBook(user.id, bookId, 'voice');
     } else {
-      alert('Please log in to save books');
+      showToast('Please log in to save books', 'info');
     }
   };
 
   const handleViewPdf = (fileUrl?: string, title?: string) => {
     if (!fileUrl) {
-      alert('No file available for this issue');
+      showToast('No PDF available for this issue', 'error');
       return;
     }
     

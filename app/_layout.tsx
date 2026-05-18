@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, Redirect } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
@@ -13,6 +13,7 @@ SplashScreen.preventAutoHideAsync();
 
 import { BooksProvider } from '@/context/BooksContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { ToastProvider } from '@/context/ToastContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -40,27 +41,29 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <BooksProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack screenOptions={{ headerShown: false }}
-            initialRouteName="index"
-          >
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="scripture-school" options={{ headerShown: false }} />
-            <Stack.Screen name="concordance" options={{ headerShown: false }} />
-            <Stack.Screen name="books-of-pentecost" options={{ headerShown: false }} />
-            <Stack.Screen name="voice-of-pentecost" options={{ headerShown: false }} />
-            <Stack.Screen name="publication-detail" options={{ headerShown: false }} />
-            <Stack.Screen name="profile" options={{ headerShown: false }} />
-            <Stack.Screen name="splash" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-            <Stack.Screen name="admin/index" options={{ headerShown: false }} />
-            <Stack.Screen name="admin/upload" options={{ headerShown: false }} />
-            <Stack.Screen name="pdf-viewer" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
+        <ToastProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack screenOptions={{ headerShown: false }}
+              initialRouteName="index"
+            >
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="login" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="scripture-school" options={{ headerShown: false }} />
+              <Stack.Screen name="concordance" options={{ headerShown: false }} />
+              <Stack.Screen name="books-of-pentecost" options={{ headerShown: false }} />
+              <Stack.Screen name="voice-of-pentecost" options={{ headerShown: false }} />
+              <Stack.Screen name="publication-detail" options={{ headerShown: false }} />
+              <Stack.Screen name="profile" options={{ headerShown: false }} />
+              <Stack.Screen name="splash" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+              <Stack.Screen name="admin/index" options={{ headerShown: false }} />
+              <Stack.Screen name="admin/upload" options={{ headerShown: false }} />
+              <Stack.Screen name="pdf-viewer" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </ToastProvider>
       </BooksProvider>
     </AuthProvider>
   );

@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AdminHeader, AdminInput, UploadZone, SelectionPicker, GRADES, MONTHS, YEARS } from '@/components/AdminComponents';
 import { useBooks } from '@/context/BooksContext';
+import { useToast } from '@/context/ToastContext';
 
 export default function UploadBookScreen() {
   const router = useRouter();
-  const { addScriptureBook, addVoiceBook, addPentecostBook } = useBooks();
+  const params = useLocalSearchParams();
+  const { addScriptureBook, addVoiceBook, addPentecostBook, updateBook } = useBooks();
+  const { showToast } = useToast();
+
+  const editId = params.id as string;
+  const isEditMode = !!editId;
 
   const [type, setType] = useState<'scripture' | 'voice' | 'pentecost'>('scripture');
   const [formData, setFormData] = useState({
@@ -36,6 +42,34 @@ export default function UploadBookScreen() {
   const imageInputRef = React.useRef<any>(null);
   const docInputRef = React.useRef<any>(null);
 
+  React.useEffect(() => {
+    if (isEditMode) {
+      setType((params.type as 'scripture' | 'voice' | 'pentecost') || 'scripture');
+      setFormData({
+        title: (params.title as string) || '',
+        subtitle: (params.subtitle as string) || '',
+        description: (params.description as string) || '',
+        author: (params.author as string) || '',
+        grade: (params.grade as string) || 'Grade 1',
+        level: 'Beginner',
+        year: (params.year as string) || '2024',
+        month: (params.month as string) || 'January',
+        pentecostCategory: (params.category as string) || 'Doctrine',
+        pentecostLanguages: (params.languages as string) || 'English'
+      });
+      if (params.imageUri) {
+        setCoverImage({ name: 'Current Cover', uri: params.imageUri as string });
+      } else {
+        setCoverImage(null);
+      }
+      if (params.fileUrl) {
+        setPdfFile({ name: 'Current Publication', uri: params.fileUrl as string });
+      } else {
+        setPdfFile(null);
+      }
+    }
+  }, [editId]);
+
   const handlePickImage = () => {
     if (imageInputRef.current) imageInputRef.current.click();
   };
@@ -48,57 +82,90 @@ export default function UploadBookScreen() {
     const file = e.target.files[0];
     if (file) {
       setFile({ name: file.name, uri: URL.createObjectURL(file), fileObject: file });
-      Alert.alert("File Selected", `${file.name} ready for upload`);
+      showToast(`${file.name} ready for upload`, 'info');
     }
   };
 
   const handleUpload = async () => {
     if (!formData.title) {
-      Alert.alert("Error", "Please enter a title");
+      showToast("Please enter a title", 'error');
       return;
     }
 
     try {
-      if (type === 'scripture') {
-        await addScriptureBook({
-          title: formData.title,
-          grade: formData.grade,
-          description: formData.description,
-          category: 'Grade'
-        }, pdfFile?.fileObject, coverImage?.fileObject);
-      } else if (type === 'voice') {
-        await addVoiceBook({
-          title: formData.title,
-          month: formData.month,
-          year: formData.year,
-          subtitle: formData.subtitle,
-          description: formData.description,
-          category: "Topic"
-        }, pdfFile?.fileObject, coverImage?.fileObject);
-      } else {
-        await addPentecostBook({
-          title: formData.title,
-          author: formData.author,
-          description: formData.description,
-          category: formData.pentecostCategory,
-          languages: formData.pentecostLanguages.split(',').map(l => l.trim()).filter(l => l !== '')
-        }, pdfFile?.fileObject, coverImage?.fileObject);
-      }
+      if (isEditMode) {
+        let updateData: any = {};
+        if (type === 'scripture') {
+          updateData = {
+            title: formData.title,
+            grade: formData.grade,
+            description: formData.description
+          };
+        } else if (type === 'voice') {
+          updateData = {
+            title: formData.title,
+            month: formData.month,
+            year: formData.year,
+            subtitle: formData.subtitle,
+            description: formData.description
+          };
+        } else {
+          updateData = {
+            title: formData.title,
+            author: formData.author,
+            description: formData.description,
+            category: formData.pentecostCategory,
+            languages: formData.pentecostLanguages.split(',').map(l => l.trim()).filter(l => l !== '')
+          };
+        }
 
-      Alert.alert(
-        "Success", 
-        `${type === 'scripture' ? 'Book' : (type === 'voice' ? 'Issue' : 'Book')} uploaded successfully!`,
-        [{ text: "OK", onPress: () => router.back() }]
-      );
+        const newFile = pdfFile?.fileObject || null;
+        const newCover = coverImage?.fileObject || null;
+
+        await updateBook(type, editId, updateData, newFile, newCover);
+
+        showToast(`${type === 'scripture' ? 'Book' : (type === 'voice' ? 'Issue' : 'Book')} updated successfully!`, 'success');
+        router.back();
+      } else {
+        if (type === 'scripture') {
+          await addScriptureBook({
+            title: formData.title,
+            grade: formData.grade,
+            description: formData.description,
+            category: 'Grade'
+          }, pdfFile?.fileObject, coverImage?.fileObject);
+        } else if (type === 'voice') {
+          await addVoiceBook({
+            title: formData.title,
+            month: formData.month,
+            year: formData.year,
+            subtitle: formData.subtitle,
+            description: formData.description,
+            category: "Topic"
+          }, pdfFile?.fileObject, coverImage?.fileObject);
+        } else {
+          await addPentecostBook({
+            title: formData.title,
+            author: formData.author,
+            description: formData.description,
+            category: formData.pentecostCategory,
+            languages: formData.pentecostLanguages.split(',').map(l => l.trim()).filter(l => l !== '')
+          }, pdfFile?.fileObject, coverImage?.fileObject);
+        }
+
+        showToast(`${type === 'scripture' ? 'Book' : (type === 'voice' ? 'Issue' : 'Book')} uploaded successfully!`, 'success');
+        router.back();
+      }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      Alert.alert("Error", "Failed to upload publication");
+      showToast(`Failed to ${isEditMode ? 'update' : 'upload'} publication`, 'error');
     }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <AdminHeader 
-        title="Upload Publication" 
+        title={isEditMode ? "Edit Publication" : "Upload Publication"} 
         showBack 
         onBack={() => {
           if (router.canGoBack()) {
@@ -262,7 +329,9 @@ export default function UploadBookScreen() {
            >
               <View className="flex-row items-center">
                  <MaterialCommunityIcons name="check-circle" size={20} color="white" className="mr-2" />
-                 <Text className="text-white font-black text-base uppercase tracking-widest ml-2">Publish Publication</Text>
+                 <Text className="text-white font-black text-base uppercase tracking-widest ml-2">
+                   {isEditMode ? "Update Publication" : "Publish Publication"}
+                 </Text>
               </View>
            </TouchableOpacity>
 

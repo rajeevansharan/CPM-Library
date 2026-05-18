@@ -3,38 +3,30 @@ import { View, Text, ScrollView, TouchableOpacity, Alert, Image, Platform } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AdminHeader } from '@/components/AdminComponents';
+import { AdminHeader, ConfirmModal } from '@/components/AdminComponents';
 import { useBooks, PentecostBook } from '@/context/BooksContext';
+import { useToast } from '@/context/ToastContext';
 
 export default function ManagePentecostScreen() {
   const router = useRouter();
   const { pentecostBooks, deleteBook } = useBooks();
+  const { showToast } = useToast();
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
+  const [selectedBook, setSelectedBook] = React.useState<PentecostBook | null>(null);
+  const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
 
-  const handleDelete = async (book: PentecostBook) => {
-    const performDelete = async () => {
-      setDeletingId(book.id);
-      try {
-        await deleteBook('pentecost', book.id);
-      } finally {
-        setDeletingId(null);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm(`Are you sure you want to delete "${book.title}"?`);
-      if (confirmed) performDelete();
-      return;
+  const handleConfirmDelete = async () => {
+    if (!selectedBook) return;
+    setDeletingId(selectedBook.id);
+    try {
+      await deleteBook('pentecost', selectedBook.id);
+      showToast(`"${selectedBook.title}" deleted successfully!`, 'success');
+    } catch (error) {
+      showToast('Failed to delete book', 'error');
+    } finally {
+      setDeletingId(null);
+      setSelectedBook(null);
     }
-
-    Alert.alert(
-      "Confirm Delete",
-      `Are you sure you want to delete this book: "${book.title}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: performDelete }
-      ]
-    );
   };
 
   return (
@@ -82,8 +74,36 @@ export default function ManagePentecostScreen() {
 
                   <View className="flex-row">
                     <TouchableOpacity 
+                      className="p-3 bg-blue-50 rounded-full ml-2"
+                      onPress={() => router.push({
+                        pathname: '/admin/upload',
+                        params: {
+                          id: book.id,
+                          type: 'pentecost',
+                          title: book.title,
+                          author: book.author || '',
+                          description: book.description || '',
+                          category: book.category,
+                          languages: book.languages ? book.languages.join(', ') : '',
+                          imageUri: book.imageUri || '',
+                          fileUrl: book.fileUrl || ''
+                        }
+                      })}
+                    >
+                      <MaterialCommunityIcons 
+                        name="pencil-outline" 
+                        size={20} 
+                        color="#203A81" 
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
                       className={`p-3 bg-red-50 rounded-full ml-2 ${deletingId === book.id ? 'opacity-50' : ''}`}
-                      onPress={() => !deletingId && handleDelete(book)}
+                      onPress={() => {
+                        if (!deletingId) {
+                          setSelectedBook(book);
+                          setIsConfirmVisible(true);
+                        }
+                      }}
                       disabled={!!deletingId}
                     >
                       <MaterialCommunityIcons 
@@ -103,6 +123,13 @@ export default function ManagePentecostScreen() {
            )}
         </View>
       </ScrollView>
+      <ConfirmModal
+        isVisible={isConfirmVisible}
+        onClose={() => setIsConfirmVisible(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Book"
+        message={`Are you sure you want to delete this book: "${selectedBook?.title}"? This action cannot be undone.`}
+      />
     </SafeAreaView>
   );
 }
