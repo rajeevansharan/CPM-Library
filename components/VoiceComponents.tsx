@@ -82,13 +82,15 @@ export const IssueCard = ({
  */
 export const ArchiveRow = ({ 
   title, 
-  subtitle 
+  subtitle,
+  onPress
 }: { 
   title: string, 
-  subtitle: string 
+  subtitle: string,
+  onPress?: () => void
 }) => {
   return (
-    <TouchableOpacity className="flex-row items-center justify-between bg-white px-5 py-4 rounded-2xl mb-3 border border-gray-50 shadow-sm">
+    <TouchableOpacity onPress={onPress} className="flex-row items-center justify-between bg-white px-5 py-4 rounded-2xl mb-3 border border-gray-50 shadow-sm">
       <View className="flex-row items-center">
         <View className="bg-gray-100 p-2.5 rounded-xl mr-4">
           <MaterialCommunityIcons name="history" size={20} color="#203A81" />

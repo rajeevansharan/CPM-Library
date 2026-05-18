@@ -20,7 +20,7 @@ import { useBooks } from '@/context/BooksContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTHS = ["All Months", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const YEARS = ["2024", "2023", "2022", "2021", "2020"];
 
 /**
@@ -83,12 +83,33 @@ export default function VoiceOfPentecostScreen() {
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [selectedMonth, setSelectedMonth] = useState('October');
-  const [selectedYear, setSelectedYear] = useState('2023');
+  const [selectedMonth, setSelectedMonth] = useState('All Months');
+  const [selectedYear, setSelectedYear] = useState('2024');
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
   const [isLanguagePickerVisible, setIsLanguagePickerVisible] = useState(false);
+  const [showAllArchive, setShowAllArchive] = useState(false);
+
+  // Compute archive statistics (unique years and their issue counts)
+  const archiveStats = React.useMemo(() => {
+    const stats: Record<string, number> = {};
+    voiceBooks.forEach(issue => {
+      if (issue.year) {
+        stats[issue.year] = (stats[issue.year] || 0) + 1;
+      }
+    });
+    // Sort years descending
+    return Object.entries(stats).sort(([yearA], [yearB]) => Number(yearB) - Number(yearA));
+  }, [voiceBooks]);
+
+  const displayedArchive = showAllArchive ? archiveStats : archiveStats.slice(0, 3);
+
+  const handleArchivePress = (year: string) => {
+    setSelectedYear(year);
+    setSelectedMonth('All Months');
+    setSelectedLanguage(null);
+  };
 
   const filteredIssues = voiceBooks.filter(issue => {
     const title = issue.title || '';
@@ -96,7 +117,7 @@ export default function VoiceOfPentecostScreen() {
     const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           subtitle.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesMonth = selectedMonth ? issue.month === selectedMonth : true;
+    const matchesMonth = (selectedMonth && selectedMonth !== 'All Months') ? issue.month === selectedMonth : true;
     const matchesYear = selectedYear ? issue.year === selectedYear : true;
     
     const matchesLanguage = selectedLanguage 
@@ -136,6 +157,11 @@ export default function VoiceOfPentecostScreen() {
       }
     });
   };
+
+  // Compute available years dynamically for the year picker
+  const availableYears = React.useMemo(() => {
+    return archiveStats.map(([year]) => year);
+  }, [archiveStats]);
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -229,14 +255,26 @@ export default function VoiceOfPentecostScreen() {
         <View className="px-6 mt-4">
            <View className="flex-row justify-between items-end mb-4">
               <Text className="text-[#203A81] text-lg font-black tracking-tight">Publication Archive</Text>
-              <TouchableOpacity>
-                 <Text className="text-[#C5A059] text-[10px] font-black uppercase tracking-widest">View All</Text>
-              </TouchableOpacity>
+              {archiveStats.length > 3 && (
+                <TouchableOpacity onPress={() => setShowAllArchive(!showAllArchive)}>
+                   <Text className="text-[#C5A059] text-[10px] font-black uppercase tracking-widest">
+                     {showAllArchive ? 'Show Less' : 'View All'}
+                   </Text>
+                </TouchableOpacity>
+              )}
            </View>
            
-           <ArchiveRow title="2022 Collection" subtitle="12 Issues Available" />
-           <ArchiveRow title="2021 Collection" subtitle="12 Issues Available" />
-           <ArchiveRow title="2020 Collection" subtitle="Special Jubilee Edition" />
+           {displayedArchive.map(([year, count]) => (
+             <ArchiveRow 
+               key={year}
+               title={`${year} Collection`} 
+               subtitle={`${count} Issues Available`} 
+               onPress={() => handleArchivePress(year)}
+             />
+           ))}
+           {archiveStats.length === 0 && (
+             <Text className="text-gray-400 text-xs italic text-center py-4">No archives available yet.</Text>
+           )}
         </View>
 
       </ScrollView>
@@ -252,7 +290,7 @@ export default function VoiceOfPentecostScreen() {
       <SelectionPicker 
         isVisible={isYearPickerVisible}
         onClose={() => setIsYearPickerVisible(false)}
-        options={YEARS}
+        options={availableYears.length > 0 ? availableYears : YEARS}
         onSelect={setSelectedYear}
         title="Select Year"
       />

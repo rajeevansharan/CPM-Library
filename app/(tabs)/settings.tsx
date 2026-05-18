@@ -11,9 +11,11 @@ import {
   MenuItem, 
   SignOutButton 
 } from '@/components/ProfileComponents';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProfileTabScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
 
   const handleSignOut = () => {
@@ -33,8 +35,8 @@ export default function ProfileTabScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 60 }}
       >
         <ProfileInfo 
-          name="Daniel Wickramasinghe" 
-          memberId="Member ID: CPM-7782-SL" 
+          name={user?.name || "Guest User"} 
+          memberId={user?.memberId ? `Member ID: ${user.memberId}` : "Member ID: N/A"} 
         />
 
         <View className="px-6 mb-8">

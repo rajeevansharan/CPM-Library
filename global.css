@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Hide the blinking text cursor globally to prevent selection UI glitches on Web */
+* {
+  caret-color: transparent;
+}
+
+/* Ensure that actual input fields still show the blinking caret */
+input, textarea {
+  caret-color: auto;
+}
