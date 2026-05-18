@@ -33,22 +33,34 @@ export const BooksHeader = ({ title }: { title: string }) => {
 export const FilterChip = ({ 
   label, 
   active = false, 
-  variant = 'topic' 
+  variant = 'topic',
+  onPress
 }: { 
   label: string, 
   active?: boolean, 
-  variant?: 'topic' | 'language' 
+  variant?: 'topic' | 'language',
+  onPress?: () => void
 }) => {
   if (variant === 'language') {
     return (
-      <TouchableOpacity className="bg-gray-100 px-4 py-1.5 rounded-lg mr-2 border border-gray-100">
-        <Text className="text-gray-500 text-[10px] font-bold">{label}</Text>
+      <TouchableOpacity 
+        onPress={onPress}
+        className={`px-4 py-1.5 rounded-lg mr-2 border ${
+          active 
+            ? 'bg-[#203A81] border-[#203A81]' 
+            : 'bg-gray-100 border-gray-100'
+        }`}
+      >
+        <Text className={`text-[10px] font-bold ${
+          active ? 'text-white' : 'text-gray-500'
+        }`}>{label}</Text>
       </TouchableOpacity>
     );
   }
 
   return (
     <TouchableOpacity 
+      onPress={onPress}
       className="px-6 py-2 rounded-full mr-2"
       style={{
         backgroundColor: active ? '#203A81' : '#F3F4F6',

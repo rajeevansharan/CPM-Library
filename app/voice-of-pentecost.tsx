@@ -85,8 +85,10 @@ export default function VoiceOfPentecostScreen() {
 
   const [selectedMonth, setSelectedMonth] = useState('October');
   const [selectedYear, setSelectedYear] = useState('2023');
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
+  const [isLanguagePickerVisible, setIsLanguagePickerVisible] = useState(false);
 
   const filteredIssues = voiceBooks.filter(issue => {
     const title = issue.title || '';
@@ -97,7 +99,11 @@ export default function VoiceOfPentecostScreen() {
     const matchesMonth = selectedMonth ? issue.month === selectedMonth : true;
     const matchesYear = selectedYear ? issue.year === selectedYear : true;
     
-    return matchesSearch && matchesMonth && matchesYear;
+    const matchesLanguage = selectedLanguage 
+      ? (issue.languages && issue.languages.includes(selectedLanguage))
+      : true;
+    
+    return matchesSearch && matchesMonth && matchesYear && matchesLanguage;
   });
 
   const isBookSaved = (bookId: string) => {
@@ -162,24 +168,38 @@ export default function VoiceOfPentecostScreen() {
         </View>
 
         {/* Dropdown Selectors */}
-        <View className="flex-row items-center px-6 mb-6 justify-between">
-           <View className="flex-row">
+        <View className="px-6 mb-4">
+           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
               <TouchableOpacity 
                 onPress={() => setIsMonthPickerVisible(true)}
-                className="bg-blue-50/50 flex-row items-center px-4 py-2 rounded-xl border border-blue-100/50 mr-3"
+                className="bg-blue-50/50 flex-row items-center px-4 py-2.5 rounded-xl border border-blue-100/50 mr-2.5"
               >
-                 <Text className="text-[#203A81] text-[11px] font-black mr-2 uppercase tracking-tighter">{selectedMonth}</Text>
-                 <MaterialCommunityIcons name="chevron-down" size={16} color="#203A81" />
+                 <Text className="text-[#203A81] text-xs font-black mr-2 uppercase tracking-tighter">{selectedMonth}</Text>
+                 <MaterialCommunityIcons name="chevron-down" size={14} color="#203A81" />
               </TouchableOpacity>
               <TouchableOpacity 
                 onPress={() => setIsYearPickerVisible(true)}
-                className="bg-blue-50/50 flex-row items-center px-4 py-2 rounded-xl border border-blue-100/50"
+                className="bg-blue-50/50 flex-row items-center px-4 py-2.5 rounded-xl border border-blue-100/50 mr-2.5"
               >
-                 <Text className="text-[#203A81] text-[11px] font-black mr-2 uppercase tracking-tighter">{selectedYear}</Text>
-                 <MaterialCommunityIcons name="chevron-down" size={16} color="#203A81" />
+                 <Text className="text-[#203A81] text-xs font-black mr-2 uppercase tracking-tighter">{selectedYear}</Text>
+                 <MaterialCommunityIcons name="chevron-down" size={14} color="#203A81" />
               </TouchableOpacity>
-           </View>
-           <Text className="text-gray-300 text-[9px] font-black uppercase tracking-widest">{filteredIssues.length} Issues Found</Text>
+              <TouchableOpacity 
+                onPress={() => setIsLanguagePickerVisible(true)}
+                className="bg-blue-50/50 flex-row items-center px-4 py-2.5 rounded-xl border border-blue-100/50"
+              >
+                 <Text className="text-[#203A81] text-xs font-black mr-2 uppercase tracking-tighter">
+                   {selectedLanguage || 'Language'}
+                 </Text>
+                 <MaterialCommunityIcons name="chevron-down" size={14} color="#203A81" />
+              </TouchableOpacity>
+           </ScrollView>
+        </View>
+
+        {/* Issue Count Section */}
+        <View className="flex-row justify-between items-center px-6 mb-4 mt-2">
+           <Text className="text-[#203A81] text-[13px] font-black uppercase tracking-wider">Publications</Text>
+           <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest">{filteredIssues.length} Issues Found</Text>
         </View>
 
         {/* magazine Grid Section */}
@@ -199,8 +219,8 @@ export default function VoiceOfPentecostScreen() {
              ))
            ) : (
              <View className="items-center justify-center w-full py-10">
-               <MaterialCommunityIcons name="clipboard-text-search-outline" size={48} color="#E5E7EB" />
-               <Text className="text-gray-400 font-bold mt-2">No issues found</Text>
+                <MaterialCommunityIcons name="clipboard-text-search-outline" size={48} color="#E5E7EB" />
+                <Text className="text-gray-400 font-bold mt-2">No issues found</Text>
              </View>
            )}
         </View>
@@ -235,6 +255,13 @@ export default function VoiceOfPentecostScreen() {
         options={YEARS}
         onSelect={setSelectedYear}
         title="Select Year"
+      />
+      <SelectionPicker 
+        isVisible={isLanguagePickerVisible}
+        onClose={() => setIsLanguagePickerVisible(false)}
+        options={['All Languages', 'English', 'Sinhala', 'Tamil']}
+        onSelect={(lang) => setSelectedLanguage(lang === 'All Languages' ? null : lang)}
+        title="Select Language"
       />
     </SafeAreaView>
   );

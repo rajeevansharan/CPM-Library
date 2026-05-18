@@ -28,6 +28,7 @@ export interface VoiceIssue {
   imageUri?: string;
   category: string;
   type: 'voice';
+  languages?: string[];
   isNew?: boolean;
   createdAt?: string;
 }
@@ -152,7 +153,11 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
       const formData = new FormData();
       Object.keys(issue).forEach(key => {
         if ((issue as any)[key] !== undefined) {
-          formData.append(key, (issue as any)[key]);
+          if (key === 'languages') {
+            formData.append(key, JSON.stringify((issue as any)[key]));
+          } else {
+            formData.append(key, (issue as any)[key]);
+          }
         }
       });
       if (file) formData.append('file', file);

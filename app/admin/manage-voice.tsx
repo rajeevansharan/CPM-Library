@@ -86,7 +86,8 @@ export default function ManageVoiceScreen() {
                           subtitle: issue.subtitle || '',
                           description: issue.description || '',
                           imageUri: issue.imageUri || '',
-                          fileUrl: issue.fileUrl || ''
+                          fileUrl: issue.fileUrl || '',
+                          languages: JSON.stringify(issue.languages || [])
                         }
                       })}
                     >

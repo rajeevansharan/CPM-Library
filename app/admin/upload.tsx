@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -17,6 +17,7 @@ export default function UploadBookScreen() {
   const isEditMode = !!editId;
 
   const [type, setType] = useState<'scripture' | 'voice' | 'pentecost'>('scripture');
+  const [selectedLangs, setSelectedLangs] = useState<string[]>(['English']);
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -26,8 +27,7 @@ export default function UploadBookScreen() {
     level: 'Beginner',
     year: '2024',
     month: 'January',
-    pentecostCategory: 'Doctrine',
-    pentecostLanguages: 'English'
+    pentecostCategory: 'Doctrine'
   });
 
   const [isGradePickerVisible, setIsGradePickerVisible] = useState(false);
@@ -54,9 +54,18 @@ export default function UploadBookScreen() {
         level: 'Beginner',
         year: (params.year as string) || '2024',
         month: (params.month as string) || 'January',
-        pentecostCategory: (params.category as string) || 'Doctrine',
-        pentecostLanguages: (params.languages as string) || 'English'
+        pentecostCategory: (params.category as string) || 'Doctrine'
       });
+      if (params.languages) {
+        try {
+          const parsed = JSON.parse(params.languages as string);
+          setSelectedLangs(Array.isArray(parsed) ? parsed : [params.languages as string]);
+        } catch {
+          setSelectedLangs((params.languages as string).split(',').map(l => l.trim()).filter(Boolean));
+        }
+      } else {
+        setSelectedLangs(['English']);
+      }
       if (params.imageUri) {
         setCoverImage({ name: 'Current Cover', uri: params.imageUri as string });
       } else {
@@ -107,7 +116,8 @@ export default function UploadBookScreen() {
             month: formData.month,
             year: formData.year,
             subtitle: formData.subtitle,
-            description: formData.description
+            description: formData.description,
+            languages: selectedLangs
           };
         } else {
           updateData = {
@@ -115,7 +125,7 @@ export default function UploadBookScreen() {
             author: formData.author,
             description: formData.description,
             category: formData.pentecostCategory,
-            languages: formData.pentecostLanguages.split(',').map(l => l.trim()).filter(l => l !== '')
+            languages: selectedLangs
           };
         }
 
@@ -141,7 +151,8 @@ export default function UploadBookScreen() {
             year: formData.year,
             subtitle: formData.subtitle,
             description: formData.description,
-            category: "Topic"
+            category: "Topic",
+            languages: selectedLangs
           }, pdfFile?.fileObject, coverImage?.fileObject);
         } else {
           await addPentecostBook({
@@ -149,7 +160,7 @@ export default function UploadBookScreen() {
             author: formData.author,
             description: formData.description,
             category: formData.pentecostCategory,
-            languages: formData.pentecostLanguages.split(',').map(l => l.trim()).filter(l => l !== '')
+            languages: selectedLangs
           }, pdfFile?.fileObject, coverImage?.fileObject);
         }
 
@@ -167,181 +178,202 @@ export default function UploadBookScreen() {
       <AdminHeader 
         title={isEditMode ? "Edit Publication" : "Upload Publication"} 
         showBack 
-        onBack={() => {
-          if (router.canGoBack()) {
-            router.back();
-          } else {
-            router.replace('/admin');
-          }
-        }} 
       />
 
-      <ScrollView 
-        className="flex-1 bg-[#F8F9FB]" 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 60 }}
-      >
-        {/* Category Selector */}
-        <View className="px-6 mt-6 mb-6">
-           <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-3 ml-1">Select Publication Type</Text>
-            <View className="flex-row bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm flex-wrap">
-              <TouchableOpacity 
-                onPress={() => setType('scripture')}
-                className={`flex-1 py-3 px-2 rounded-xl flex-row justify-center items-center m-0.5 ${type === 'scripture' ? 'bg-[#203A81]' : ''}`}
-                style={{ minWidth: '30%' }}
-              >
-                 <MaterialCommunityIcons name="book-open-page-variant" size={16} color={type === 'scripture' ? 'white' : '#9CA3AF'} className="mr-2" />
-                 <Text className={`font-bold text-[10px] ${type === 'scripture' ? 'text-white' : 'text-gray-400'}`}>Scripture</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={() => setType('voice')}
-                className={`flex-1 py-3 px-2 rounded-xl flex-row justify-center items-center m-0.5 ${type === 'voice' ? 'bg-[#203A81]' : ''}`}
-                style={{ minWidth: '30%' }}
-              >
-                 <MaterialCommunityIcons name="library-shelves" size={16} color={type === 'voice' ? 'white' : '#9CA3AF'} className="mr-2" />
-                 <Text className={`font-bold text-[10px] ${type === 'voice' ? 'text-white' : 'text-gray-400'}`}>Voice</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={() => setType('pentecost')}
-                className={`flex-1 py-3 px-2 rounded-xl flex-row justify-center items-center m-0.5 ${type === 'pentecost' ? 'bg-[#203A81]' : ''}`}
-                style={{ minWidth: '30%' }}
-              >
-                 <MaterialCommunityIcons name="book-open-variant" size={16} color={type === 'pentecost' ? 'white' : '#9CA3AF'} className="mr-2" />
-                 <Text className={`font-bold text-[10px] ${type === 'pentecost' ? 'text-white' : 'text-gray-400'}`}>Pentecost</Text>
-              </TouchableOpacity>
-           </View>
-        </View>
-
-        <View className="px-6">
-           {/* Basic Metadata */}
-           <AdminInput 
-             label="Publication Title" 
-             placeholder={type === 'scripture' ? "e.g. Grade 10: Faith and Action" : "e.g. October 2024"} 
-             icon="format-title" 
-             value={formData.title}
-             onChangeText={(t) => setFormData({...formData, title: t})}
-           />
-
-           {type === 'voice' && (
-             <AdminInput 
-               label="Issue Subtitle" 
-               placeholder="e.g. The Power of Stillness" 
-               icon="text-short" 
-               value={formData.subtitle}
-               onChangeText={(t) => setFormData({...formData, subtitle: t})}
-             />
-           )}
-           
-           {type === 'pentecost' && (
-             <AdminInput 
-               label="Book Author" 
-               placeholder="e.g. Pastor T. Frederick" 
-               icon="account-edit" 
-               value={formData.author}
-               onChangeText={(t) => setFormData({...formData, author: t})}
-             />
-           )}
-
-           <AdminInput 
-             label="Detailed Description" 
-             placeholder="Enter a brief summary of the content..." 
-             icon="text-subject" 
-             multiline
-             value={formData.description}
-             onChangeText={(t) => setFormData({...formData, description: t})}
-           />
-
-           {/* Type Specific Metadata */}
-           <View className="flex-row mb-6">
-              <View className="flex-1 mr-2">
-                 <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">
-                   {type === 'scripture' ? 'Grade' : (type === 'voice' ? 'Month' : 'Category')}
-                 </Text>
-                 <TouchableOpacity 
-                    onPress={() => {
-                      if (type === 'scripture') setIsGradePickerVisible(true);
-                      else if (type === 'voice') setIsMonthPickerVisible(true);
-                      else setIsCategoryPickerVisible(true);
-                    }}
-                    className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex-row justify-between items-center"
-                 >
-                    <Text className="text-[#203A81] text-sm font-bold">
-                      {type === 'scripture' ? formData.grade : (type === 'voice' ? formData.month : formData.pentecostCategory)}
+      <ScrollView className="flex-1 px-6 pt-4" showsVerticalScrollIndicator={false}>
+         {/* Form Fields Container */}
+         <View className="pb-10">
+            {/* Type Selector Tabs */}
+            <View className="flex-row bg-gray-50 p-1.5 rounded-2xl mb-6">
+              {[
+                { id: 'scripture', label: 'Scripture' },
+                { id: 'voice', label: 'Voice' },
+                { id: 'pentecost', label: 'Pentecost' }
+              ].map((tab) => {
+                const isActive = type === tab.id;
+                return (
+                  <TouchableOpacity
+                    key={tab.id}
+                    disabled={isEditMode}
+                    onPress={() => setType(tab.id as any)}
+                    className={`flex-1 py-3 rounded-xl items-center ${
+                      isActive ? 'bg-[#203A81]' : 'bg-transparent'
+                    } ${isEditMode ? 'opacity-50' : ''}`}
+                  >
+                    <Text className={`text-xs font-black uppercase tracking-wider ${isActive ? 'text-white' : 'text-gray-400'}`}>
+                      {tab.label}
                     </Text>
-                    <MaterialCommunityIcons name="chevron-down" size={18} color="#203A81" />
-                 </TouchableOpacity>
-              </View>
-              
-              {type === 'voice' && (
-                <View className="flex-1 ml-2">
-                   <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">Year</Text>
-                   <TouchableOpacity 
-                      onPress={() => setIsYearPickerVisible(true)}
-                      className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex-row justify-between items-center"
-                   >
-                      <Text className="text-[#203A81] text-sm font-bold">{formData.year}</Text>
-                      <MaterialCommunityIcons name="chevron-down" size={18} color="#203A81" />
-                   </TouchableOpacity>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Title & Common Info */}
+            <AdminInput 
+              label="Publication Title" 
+              placeholder="e.g. Pentecostal Message" 
+              icon="book-open-page-variant" 
+              value={formData.title}
+              onChangeText={(t) => setFormData({...formData, title: t})}
+            />
+
+            {type === 'voice' && (
+              <AdminInput 
+                label="Issue Subtitle" 
+                placeholder="e.g. The Message of Pentecost" 
+                icon="text-short" 
+                value={formData.subtitle}
+                onChangeText={(t) => setFormData({...formData, subtitle: t})}
+              />
+            )}
+
+            {type === 'pentecost' && (
+              <AdminInput 
+                label="Author Name" 
+                placeholder="e.g. Rev. C.K. John" 
+                icon="account-edit" 
+                value={formData.author}
+                onChangeText={(t) => setFormData({...formData, author: t})}
+              />
+            )}
+
+            <AdminInput 
+              label="Detailed Description" 
+              placeholder="Enter a brief summary of the content..." 
+              icon="text-subject" 
+              multiline
+              value={formData.description}
+              onChangeText={(t) => setFormData({...formData, description: t})}
+            />
+
+            {/* Type Specific Metadata */}
+            <View className="flex-row mb-6">
+               <View className={type === 'voice' ? "flex-1 mr-2" : "w-full"}>
+                  <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">
+                    {type === 'scripture' ? 'Grade' : (type === 'voice' ? 'Month' : 'Category')}
+                  </Text>
+                  <TouchableOpacity 
+                     onPress={() => {
+                       if (type === 'scripture') setIsGradePickerVisible(true);
+                       else if (type === 'voice') setIsMonthPickerVisible(true);
+                       else setIsCategoryPickerVisible(true);
+                     }}
+                     className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex-row justify-between items-center"
+                  >
+                     <Text className="text-[#203A81] text-sm font-bold">
+                       {type === 'scripture' ? formData.grade : (type === 'voice' ? formData.month : formData.pentecostCategory)}
+                     </Text>
+                     <MaterialCommunityIcons name="chevron-down" size={18} color="#203A81" />
+                  </TouchableOpacity>
+               </View>
+               
+               {type === 'voice' && (
+                 <View className="flex-1 ml-2">
+                    <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">Year</Text>
+                    <TouchableOpacity 
+                       onPress={() => setIsYearPickerVisible(true)}
+                       className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex-row justify-between items-center"
+                    >
+                       <Text className="text-[#203A81] text-sm font-bold">{formData.year}</Text>
+                       <MaterialCommunityIcons name="chevron-down" size={18} color="#203A81" />
+                    </TouchableOpacity>
+                 </View>
+               )}
+            </View>
+
+            {/* Language Selector for Voice and Pentecost */}
+            {(type === 'voice' || type === 'pentecost') && (
+              <View className="mb-6">
+                <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">Languages (Select multiple)</Text>
+                <View className="flex-row">
+                  {['English', 'Sinhala', 'Tamil'].map((lang) => {
+                    const isSelected = selectedLangs.includes(lang);
+                    return (
+                      <TouchableOpacity
+                        key={lang}
+                        onPress={() => {
+                          if (isSelected) {
+                            if (selectedLangs.length > 1) {
+                              setSelectedLangs(selectedLangs.filter(l => l !== lang));
+                            } else {
+                              showToast("Please keep at least one language selected", "info");
+                            }
+                          } else {
+                            setSelectedLangs([...selectedLangs, lang]);
+                          }
+                        }}
+                        className={`flex-row items-center px-4 py-2.5 rounded-full mr-3 border ${
+                          isSelected 
+                            ? 'bg-[#203A81] border-[#203A81]' 
+                            : 'bg-white border-gray-100'
+                        }`}
+                        style={{
+                          shadowColor: '#203A81',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: isSelected ? 0.1 : 0,
+                          shadowRadius: 4,
+                          elevation: isSelected ? 2 : 0
+                        }}
+                      >
+                        <MaterialCommunityIcons 
+                          name={isSelected ? "check-circle" : "circle-outline"} 
+                          size={14} 
+                          color={isSelected ? 'white' : '#9CA3AF'} 
+                          style={{ marginRight: 6 }}
+                        />
+                        <Text className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-gray-500'}`}>
+                          {lang}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
-              )}
-
-              {type === 'pentecost' && (
-                <View className="flex-1 ml-2">
-                   <Text className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">Languages</Text>
-                   <TextInput 
-                     placeholder="e.g. English, Sinhala" 
-                     className="bg-white border border-gray-100 rounded-2xl px-4 py-2.5 shadow-sm text-[#203A81] text-xs font-bold"
-                     value={formData.pentecostLanguages}
-                     onChangeText={(t) => setFormData({...formData, pentecostLanguages: t})}
-                     style={{ outlineStyle: 'none' } as any}
-                   />
-                </View>
-              )}
-           </View>
-
-           {/* File Uploads */}
-           <View className="flex-row">
-              <View className="flex-1 mr-2">
-                 <UploadZone 
-                    label="Cover Image" 
-                    icon="image-outline" 
-                    sublabel="JPG, PNG (Max 5MB)" 
-                    type="image"
-                    onPress={handlePickImage}
-                    fileName={coverImage?.name}
-                 />
               </View>
-              <View className="flex-1 ml-2">
-                 <UploadZone 
-                    label="Publication File" 
-                    icon="file-pdf-box" 
-                    sublabel="PDF, EPUB (Max 50MB)" 
-                    onPress={handlePickDocument}
-                    fileName={pdfFile?.name}
-                 />
-              </View>
-           </View>
+            )}
 
-           {/* Submit Button */}
-           <TouchableOpacity 
-             onPress={handleUpload}
-             className="bg-[#203A81] py-4 rounded-2xl items-center shadow-lg shadow-blue-900/20 active:opacity-90 mt-4"
-           >
-              <View className="flex-row items-center">
-                 <MaterialCommunityIcons name="check-circle" size={20} color="white" className="mr-2" />
-                 <Text className="text-white font-black text-base uppercase tracking-widest ml-2">
-                   {isEditMode ? "Update Publication" : "Publish Publication"}
-                 </Text>
-              </View>
-           </TouchableOpacity>
+            {/* File Uploads */}
+            <View className="flex-row">
+               <View className="flex-1 mr-2">
+                  <UploadZone 
+                     label="Cover Image" 
+                     icon="image-outline" 
+                     sublabel="JPG, PNG (Max 5MB)" 
+                     type="image"
+                     onPress={handlePickImage}
+                     fileName={coverImage?.name}
+                  />
+               </View>
+               <View className="flex-1 ml-2">
+                  <UploadZone 
+                     label="Publication File" 
+                     icon="file-pdf-box" 
+                     sublabel="PDF, EPUB (Max 50MB)" 
+                     onPress={handlePickDocument}
+                     fileName={pdfFile?.name}
+                  />
+               </View>
+            </View>
 
-           <TouchableOpacity 
-             onPress={() => router.back()}
-             className="mt-4 py-4 items-center"
-           >
-              <Text className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Discard Draft</Text>
-           </TouchableOpacity>
-        </View>
+            {/* Submit Button */}
+            <TouchableOpacity 
+              onPress={handleUpload}
+              className="bg-[#203A81] py-4 rounded-2xl items-center shadow-lg shadow-blue-900/20 active:opacity-90 mt-4"
+            >
+               <View className="flex-row items-center">
+                  <MaterialCommunityIcons name="check-circle" size={20} color="white" className="mr-2" />
+                  <Text className="text-white font-black text-base uppercase tracking-widest ml-2">
+                    {isEditMode ? "Update Publication" : "Publish Publication"}
+                  </Text>
+               </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              className="mt-4 py-4 items-center"
+            >
+               <Text className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Discard Draft</Text>
+            </TouchableOpacity>
+         </View>
       </ScrollView>
 
       {/* Hidden File Inputs for Web compatibility */}

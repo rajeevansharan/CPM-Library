@@ -103,7 +103,7 @@ router.post('/voice', upload.fields([
   { name: 'file', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const { title, month, year, subtitle, description } = req.body;
+    const { title, month, year, subtitle, description, languages } = req.body;
     const files = req.files;
 
     let coverImageUrl = null;
@@ -136,6 +136,7 @@ router.post('/voice', upload.fields([
         fileUrl: fileUrl,
         category: 'Topic',
         type: 'voice',
+        languages: languages ? JSON.parse(languages) : [],
         isNew: false,
       },
     });
@@ -350,13 +351,14 @@ router.put('/:type/:id', upload.fields([
         data
       });
     } else if (type === 'voice') {
-      const { title, month, year, subtitle, description } = req.body;
+      const { title, month, year, subtitle, description, languages } = req.body;
       const data = {
         title,
         month,
         year,
         subtitle: subtitle === 'undefined' ? null : subtitle,
         description: description === 'undefined' ? null : description,
+        languages: languages ? JSON.parse(languages) : [],
       };
       if (coverImageUrl) data.imageUri = coverImageUrl;
       if (fileUrl) data.fileUrl = fileUrl;

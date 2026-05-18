@@ -38,6 +38,7 @@ model VoiceBook {
   fileUrl     String?
   category    String   @default("Topic")
   type        String   @default("voice")
+  languages   String[] @default([])
   isNew       Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
