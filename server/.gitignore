@@ -1,0 +1,21 @@
+# Environment variables — NEVER commit this
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+
+# Uploaded files (served locally, stored on Cloudinary in production)
+uploads/
+
+# Prisma generated client (regenerated on deploy)
+prisma/generated/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

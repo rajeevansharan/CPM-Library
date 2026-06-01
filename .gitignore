@@ -45,3 +45,10 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Server-specific ignores
+/server/.env
+/server/.env.*
+/server/node_modules/
+/server/package-lock.json
+/server/uploads/

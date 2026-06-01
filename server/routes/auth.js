@@ -5,8 +5,13 @@ const prisma = require('../lib/prisma');
 
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
-const JWT_EXPIRES_IN = '7d';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+
+// Ensure a secret is provided in production to avoid accidental token acceptance
+if (process.env.NODE_ENV === "production" && !JWT_SECRET) {
+  throw new Error("Missing required environment variable: JWT_SECRET");
+}
 
 /**
  * POST /api/auth/login

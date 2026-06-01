@@ -41,8 +41,8 @@
       "year": "2023",
       "subtitle": "test",
       "description": "test",
-      "imageUri": "http://localhost:5000/uploads/1777140174115-hero1.png",
-      "fileUrl": "http://localhost:5000/uploads/1777140174093-2025(B23).pdf",
+      "imageUri": null,
+      "fileUrl": null,
       "category": "Topic",
       "type": "voice",
       "isNew": false
@@ -55,11 +55,9 @@
       "author": "test author ",
       "description": "test description",
       "category": "Doctrine",
-      "languages": [
-        "English"
-      ],
-      "imageUri": "http://localhost:5000/uploads/1777142540046-Gemini_Generated_Image_lmxqlnlmxqlnlmxq.png",
-      "fileUrl": "http://localhost:5000/uploads/1777142540028-2025(B23).pdf",
+      "languages": ["English"],
+      "imageUri": null,
+      "fileUrl": null,
       "type": "pentecost"
     }
   ]

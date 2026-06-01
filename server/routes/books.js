@@ -11,6 +11,12 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// Cloudinary folder configuration (optional via env)
+const COVERS_FOLDER =
+  process.env.CLOUDINARY_FOLDER_COVERS || "cpm_library/covers";
+const PUBLICATIONS_FOLDER =
+  process.env.CLOUDINARY_FOLDER_PUBLICATIONS || "cpm_library/publications";
+
 /**
  * Helper to upload a buffer to Cloudinary via stream
  */
@@ -60,23 +66,23 @@ router.post('/scripture', upload.fields([
     let coverImageUrl = null;
     let fileUrl = null;
 
-    // 1. Upload Cover Image to Cloudinary
-    if (files.coverImage) {
-      const result = await uploadToCloudinary(files.coverImage[0].buffer, {
-        folder: 'cpm_library/covers',
-        resource_type: 'image'
-      });
-      coverImageUrl = result.secure_url;
-    }
+      // 1. Upload Cover Image to Cloudinary
+      if (files.coverImage) {
+        const result = await uploadToCloudinary(files.coverImage[0].buffer, {
+          folder: COVERS_FOLDER,
+          resource_type: "image",
+        });
+        coverImageUrl = result.secure_url;
+      }
 
-    // 2. Upload PDF File to Cloudinary
-    if (files.file) {
-      const result = await uploadToCloudinary(files.file[0].buffer, {
-        folder: 'cpm_library/publications',
-        resource_type: 'raw' // Important for non-image files like PDF
-      });
-      fileUrl = result.secure_url;
-    }
+      // 2. Upload PDF File to Cloudinary
+      if (files.file) {
+        const result = await uploadToCloudinary(files.file[0].buffer, {
+          folder: PUBLICATIONS_FOLDER,
+          resource_type: "raw", // Important for non-image files like PDF
+        });
+        fileUrl = result.secure_url;
+      }
 
     const newBook = await prisma.scriptureBook.create({
       data: {
@@ -109,21 +115,21 @@ router.post('/voice', upload.fields([
     let coverImageUrl = null;
     let fileUrl = null;
 
-    if (files.coverImage) {
-      const result = await uploadToCloudinary(files.coverImage[0].buffer, {
-        folder: 'cpm_library/covers',
-        resource_type: 'image'
-      });
-      coverImageUrl = result.secure_url;
-    }
+      if (files.coverImage) {
+        const result = await uploadToCloudinary(files.coverImage[0].buffer, {
+          folder: COVERS_FOLDER,
+          resource_type: "image",
+        });
+        coverImageUrl = result.secure_url;
+      }
 
-    if (files.file) {
-      const result = await uploadToCloudinary(files.file[0].buffer, {
-        folder: 'cpm_library/publications',
-        resource_type: 'raw'
-      });
-      fileUrl = result.secure_url;
-    }
+      if (files.file) {
+        const result = await uploadToCloudinary(files.file[0].buffer, {
+          folder: PUBLICATIONS_FOLDER,
+          resource_type: "raw",
+        });
+        fileUrl = result.secure_url;
+      }
 
     const newIssue = await prisma.voiceBook.create({
       data: {
@@ -160,21 +166,21 @@ router.post('/pentecost', upload.fields([
     let coverImageUrl = null;
     let fileUrl = null;
 
-    if (files.coverImage) {
-      const result = await uploadToCloudinary(files.coverImage[0].buffer, {
-        folder: 'cpm_library/covers',
-        resource_type: 'image'
-      });
-      coverImageUrl = result.secure_url;
-    }
+      if (files.coverImage) {
+        const result = await uploadToCloudinary(files.coverImage[0].buffer, {
+          folder: COVERS_FOLDER,
+          resource_type: "image",
+        });
+        coverImageUrl = result.secure_url;
+      }
 
-    if (files.file) {
-      const result = await uploadToCloudinary(files.file[0].buffer, {
-        folder: 'cpm_library/publications',
-        resource_type: 'raw'
-      });
-      fileUrl = result.secure_url;
-    }
+      if (files.file) {
+        const result = await uploadToCloudinary(files.file[0].buffer, {
+          folder: PUBLICATIONS_FOLDER,
+          resource_type: "raw",
+        });
+        fileUrl = result.secure_url;
+      }
 
     const newBook = await prisma.pentecostBook.create({
       data: {
@@ -305,34 +311,37 @@ router.get('/saved/:userId', async (req, res) => {
 });
 
 // ─── PUT Update Book ─────────────────────────────────────────────────────────────
-router.put('/:type/:id', upload.fields([
-  { name: 'coverImage', maxCount: 1 },
-  { name: 'file', maxCount: 1 }
-]), async (req, res) => {
-  try {
-    const { type, id } = req.params;
-    const files = req.files;
+router.put(
+  "/:type/:id",
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "file", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const { type, id } = req.params;
+      const files = req.files;
 
     let coverImageUrl = undefined;
     let fileUrl = undefined;
 
-    // 1. Upload new Cover Image to Cloudinary if supplied
-    if (files && files.coverImage) {
-      const result = await uploadToCloudinary(files.coverImage[0].buffer, {
-        folder: 'cpm_library/covers',
-        resource_type: 'image'
-      });
-      coverImageUrl = result.secure_url;
-    }
+      // 1. Upload new Cover Image to Cloudinary if supplied
+      if (files && files.coverImage) {
+        const result = await uploadToCloudinary(files.coverImage[0].buffer, {
+          folder: COVERS_FOLDER,
+          resource_type: "image",
+        });
+        coverImageUrl = result.secure_url;
+      }
 
-    // 2. Upload new PDF File to Cloudinary if supplied
-    if (files && files.file) {
-      const result = await uploadToCloudinary(files.file[0].buffer, {
-        folder: 'cpm_library/publications',
-        resource_type: 'raw'
-      });
-      fileUrl = result.secure_url;
-    }
+      // 2. Upload new PDF File to Cloudinary if supplied
+      if (files && files.file) {
+        const result = await uploadToCloudinary(files.file[0].buffer, {
+          folder: PUBLICATIONS_FOLDER,
+          resource_type: "raw",
+        });
+        fileUrl = result.secure_url;
+      }
 
     let updatedBook = null;
 
@@ -434,7 +443,7 @@ router.get('/download', async (req, res) => {
         return;
       }
 
-      if (proxyRes.statusCode !== 200) {
+        if (proxyRes.statusCode !== 200) {
         return res.status(proxyRes.statusCode).json({ message: 'Failed to fetch file from storage' });
       }
 
