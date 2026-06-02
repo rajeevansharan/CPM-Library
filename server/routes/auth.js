@@ -19,16 +19,22 @@ if (process.env.NODE_ENV === "production" && !JWT_SECRET) {
  */
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, memberId } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+    if ((!email && !memberId) || !password) {
+      return res.status(400).json({ message: 'Email or member ID, and password are required' });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    let user;
+    if (email) {
+      user = await prisma.user.findUnique({ where: { email } });
+    }
+    if (!user && memberId) {
+      user = await prisma.user.findUnique({ where: { memberId } });
+    }
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Compare hashed password
