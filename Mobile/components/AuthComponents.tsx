@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -11,40 +11,69 @@ export const InputField = ({
   icon, 
   value,
   onChangeText,
-  isPassword = false, 
-  optional = false 
-}: { 
-  label: string; 
-  placeholder: string; 
-  icon?: string; 
+  isPassword = false,
+  optional = false,
+  keyboardType = 'default',
+  autoCapitalize = 'sentences',
+}: {
+  label: string;
+  placeholder: string;
+  icon?: string;
   value?: string;
   onChangeText?: (text: string) => void;
   isPassword?: boolean;
   optional?: boolean;
+  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <View className="mb-4">
       <Text className="text-[10px] font-bold text-gray-400 mb-1 tracking-widest uppercase">
         {label} {optional && <Text className="normal-case font-normal">(OPTIONAL)</Text>}
       </Text>
-      <View className="flex-row items-center bg-gray-50 border border-gray-100 rounded-lg px-3 py-3 shadow-sm">
+      <View
+        className="flex-row items-center bg-gray-50 border border-gray-100 rounded-lg px-3 shadow-sm"
+        style={{ minHeight: 52 }}
+      >
         {icon && (
-          <MaterialCommunityIcons 
-            name={icon as any} 
-            size={18} 
-            color="#9CA3AF" 
-            className="mr-2" 
+          <MaterialCommunityIcons
+            name={icon as any}
+            size={18}
+            color="#9CA3AF"
+            style={{ marginRight: 8 }}
           />
         )}
         <TextInput
           placeholder={placeholder}
-          secureTextEntry={isPassword}
+          secureTextEntry={isPassword && !showPassword}
           value={value}
           onChangeText={onChangeText}
-          className="flex-1 text-gray-700 text-sm h-5"
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+          autoCorrect={false}
           placeholderTextColor="#9CA3AF"
-          style={{ outlineStyle: 'none' } as any}
+          style={{
+            flex: 1,
+            fontSize: 14,
+            color: '#1F2937',
+            paddingVertical: 14,
+            outlineStyle: 'none',
+          } as any}
         />
+        {isPassword && (
+          <TouchableOpacity
+            onPress={() => setShowPassword(prev => !prev)}
+            style={{ paddingLeft: 8 }}
+          >
+            <MaterialCommunityIcons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={18}
+              color="#9CA3AF"
+            />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

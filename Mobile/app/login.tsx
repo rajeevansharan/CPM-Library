@@ -148,6 +148,8 @@ const LoginScreen = () => {
               label="Email Address"
               placeholder="e.g. user@cpm.com"
               icon="email-outline"
+              keyboardType="email-address"
+              autoCapitalize="none"
               value={email}
               onChangeText={setEmail}
             />
@@ -174,6 +176,7 @@ const LoginScreen = () => {
                 placeholder="CPM-XXXXX"
                 icon="card-account-details-outline"
                 optional={true}
+                autoCapitalize="characters"
                 value={memberId}
                 onChangeText={setMemberId}
               />

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Dimensions, StyleSheet, ActivityIndicator } from 'react-native';
-import Pdf from 'react-native-pdf';
+import React, { useState } from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { WebView } from 'react-native-webview';
 
 interface PdfRendererProps {
   url: string;
@@ -8,36 +8,47 @@ interface PdfRendererProps {
 }
 
 export default function PdfRenderer({ url, title }: PdfRendererProps) {
-  const source = { uri: url, cache: true };
+  const [loading, setLoading] = useState(true);
+
+  // Use Google Docs viewer for remote PDFs, direct URL for local/LAN
+  const isLocalUrl = url.includes('localhost') || url.includes('127.0.0.1') || url.includes('192.168.') || url.includes('10.');
+  const viewerUrl = isLocalUrl
+    ? url
+    : `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
 
   return (
-    <Pdf
-      source={source}
-      onLoadComplete={(numberOfPages: number) => {
-        console.log(`Number of pages: ${numberOfPages}`);
-      }}
-      onPageChanged={(page: number) => {
-        console.log(`Current page: ${page}`);
-      }}
-      onError={(error: any) => {
-        console.log('PDF Error:', error);
-      }}
-      onPressLink={(uri: string) => {
-        console.log(`Link pressed: ${uri}`);
-      }}
-      style={styles.pdf}
-      renderActivityIndicator={() => (
-        <ActivityIndicator color="#203A81" size="large" />
+    <View style={styles.container}>
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator color="#203A81" size="large" />
+        </View>
       )}
-    />
+      <WebView
+        source={{ uri: viewerUrl }}
+        style={styles.webview}
+        onLoadEnd={() => setLoading(false)}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={false}
+        scalesPageToFit={true}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  pdf: {
+  container: {
     flex: 1,
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
     backgroundColor: '#F8F9FB',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FB',
+    zIndex: 10,
+  },
+  webview: {
+    flex: 1,
   },
 });
